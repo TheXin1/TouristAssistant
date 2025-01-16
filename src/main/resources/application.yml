@@ -1,4 +1,10 @@
 spring:
+  datasource:
+    driver-class-name: com.mysql.cj.jdbc.Driver
+    url: jdbc:mysql://localhost:3306/tourist_assistant?useSSL=false&serverTimezone=UTC&useUnicode=true&characterEncoding=utf8
+    username: root
+    password: 1234
+
   application:
     name: TouristAssistant
 
@@ -8,3 +14,6 @@ spring:
       base-url: https://api.xty.app
 
 
+mybatis:
+  configuration:
+    map-underscore-to-camel-case: true
