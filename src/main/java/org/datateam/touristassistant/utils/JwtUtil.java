@@ -1,4 +1,4 @@
-package com.example.disabledfitness.Utils;
+package org.datateam.touristassistant.utils;
 
 import com.auth0.jwt.JWT;
 import com.auth0.jwt.algorithms.Algorithm;
