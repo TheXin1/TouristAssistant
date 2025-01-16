@@ -2,8 +2,10 @@ package org.datateam.touristassistant.service;
 
 import org.springframework.stereotype.Service;
 
-@Service
+
 public interface AiService {
 
+    //获取生成回答
+    public String generate(String message);
 
 }

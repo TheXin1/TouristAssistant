@@ -1,4 +1,4 @@
-package com.example.disabledfitness.Utils;
+package org.datateam.touristassistant.utils;
 
 import java.util.UUID;
 
