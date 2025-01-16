@@ -1,0 +1,10 @@
+spring:
+  application:
+    name: TouristAssistant
+
+  ai:
+    openai:
+      api-key: sk-8EvSZcQqQWRlb07l290b29A69a774e9e8aB38786E3E4D833
+      base-url: https://api.xty.app
+
+
