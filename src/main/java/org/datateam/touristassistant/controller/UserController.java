@@ -2,6 +2,7 @@ package org.datateam.touristassistant.controller;
 
 import org.datateam.touristassistant.pojo.User;
 import org.datateam.touristassistant.service.UserService;
+import org.datateam.touristassistant.service.impl.UserServiceImpl;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
@@ -12,7 +13,7 @@ import java.util.List;
 public class UserController {
 
     @Autowired
-    private UserService userService;
+    private UserServiceImpl userService;
 
     @PostMapping
     public String createUser(@RequestBody User user) {
