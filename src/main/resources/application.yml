@@ -4,15 +4,26 @@ spring:
     url: jdbc:mysql://localhost:3306/tourist_assistant?useSSL=false&serverTimezone=UTC&useUnicode=true&characterEncoding=utf8
     username: root
     password: root
-
   application:
     name: TouristAssistant
 
+  servlet:
+    multipart:
+      max-file-size: 100MB
+      max-request-size: 100MB
   ai:
     openai:
       api-key: sk-8EvSZcQqQWRlb07l290b29A69a774e9e8aB38786E3E4D833
       base-url: https://api.xty.app
-
+      chat:
+        options:
+          model: "gpt-3.5-turbo"
+    vectorstore:
+      redis:
+        uri: redis://localhost:6379
+        index: Travel
+        prefix: "RAG"
+        initialize-schema: true
 
 mybatis:
   configuration:

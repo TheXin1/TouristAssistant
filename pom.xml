@@ -93,21 +93,13 @@
         </dependency>
 <!--        向量数据库依赖-->
         <dependency>
-            <groupId>org.springframework.boot</groupId>
-            <artifactId>spring-boot-starter-data-redis</artifactId>
+            <groupId>org.springframework.ai</groupId>
+            <artifactId>spring-ai-redis-store-spring-boot-starter</artifactId>
         </dependency>
-<!--word处理包-->
+<!--        文件处理依赖-->
         <dependency>
-            <groupId>org.apache.poi</groupId>
-            <artifactId>poi-ooxml</artifactId>
-            <version>5.2.3</version>
-        </dependency>
-
-<!--        pdf处理包-->
-        <dependency>
-            <groupId>org.apache.pdfbox</groupId>
-            <artifactId>pdfbox</artifactId>
-            <version>2.0.28</version>
+            <groupId>org.springframework.ai</groupId>
+            <artifactId>spring-ai-tika-document-reader</artifactId>
         </dependency>
 
     </dependencies>
