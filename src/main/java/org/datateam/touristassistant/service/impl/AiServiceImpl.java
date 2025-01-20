@@ -10,6 +10,8 @@ import org.springframework.ai.openai.OpenAiChatOptions;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.util.stream.DoubleStream;
+
 
 @Service
 public class AiServiceImpl implements AiService {
@@ -24,11 +26,10 @@ public class AiServiceImpl implements AiService {
      */
     @Override
     public String generate(String message) {
+        DoubleStream OpenAiChatOptions = null;
         ChatResponse response= chatModel.call(
-                new Prompt(message, OpenAiChatOptions.builder()
-                        .withModel("gpt-3.5-turbo")
-                        .withTemperature(0.7)
-                        .build()
+                new Prompt(message, DoubleStream.builder()
+                        .hashCode()
                 )
         );
 

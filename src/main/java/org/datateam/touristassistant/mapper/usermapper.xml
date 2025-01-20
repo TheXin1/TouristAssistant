@@ -1,0 +1,24 @@
+<mapper namespace="org.datateam.touristassistant.mapper.UserMapper">
+    <insert id="insertUser" parameterType="org.datateam.touristassistant.pojo.User">
+        INSERT INTO users (username, password_hash, email, phone)
+        VALUES (#{username}, #{passwordHash}, #{email}, #{phone})
+    </insert>
+
+    <select id="getUserById" parameterType="Long" resultType="org.datateam.touristassistant.pojo.User">
+        SELECT * FROM users WHERE user_id = #{userId}
+    </select>
+
+    <select id="getAllUsers" resultType="org.datateam.touristassistant.pojo.User">
+        SELECT * FROM users
+    </select>
+
+    <update id="updateUser" parameterType="org.datateam.touristassistant.pojo.User">
+        UPDATE users
+        SET username = #{username}, password_hash = #{passwordHash}, email = #{email}, phone = #{phone}, updated_at = CURRENT_TIMESTAMP
+        WHERE user_id = #{userId}
+    </update>
+
+    <delete id="deleteUser" parameterType="Long">
+        DELETE FROM users WHERE user_id = #{userId}
+    </delete>
+</mapper>
