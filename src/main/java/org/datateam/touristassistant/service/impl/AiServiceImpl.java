@@ -28,8 +28,10 @@ public class AiServiceImpl implements AiService {
     public String generate(String message) {
         DoubleStream OpenAiChatOptions = null;
         ChatResponse response= chatModel.call(
-                new Prompt(message, DoubleStream.builder()
-                        .hashCode()
+                new Prompt(message, OpenAiChatOptions.builder()
+                        .withModel("gpt-3.5-turbo")
+                        .withTemperature(0.7)
+                        .build()
                 )
         );
 

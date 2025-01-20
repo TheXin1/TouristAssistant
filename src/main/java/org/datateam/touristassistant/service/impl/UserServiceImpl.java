@@ -12,7 +12,7 @@ import java.util.List;
 public class UserServiceImpl implements UserService {
 
     @Autowired
-：    private UserMapper userMapper;
+    private UserMapper userMapper;
 
     @Override
     public void addUser(User user) {
