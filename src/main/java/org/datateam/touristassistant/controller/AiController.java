@@ -18,13 +18,27 @@ public class AiController {
      */
     @RequestMapping("/chatTest")
     public String chatTest(String message){
-        message="请问你是谁?";
         return aiService.generate(message);
     }
 
+    /**
+     * @param message
+     * @return {@link String }
+     * 普通问答
+     */
     @GetMapping("/rag")
     public String chatRAG(String message){
         return aiService.generateRAG(message);
+    }
+
+    /**
+     * @param message
+     * @return {@link String }
+     * 生成计划
+     */
+    @GetMapping("/plan")
+    public String chatPlan(String message){
+        return aiService.generatePlan(message);
     }
 
 

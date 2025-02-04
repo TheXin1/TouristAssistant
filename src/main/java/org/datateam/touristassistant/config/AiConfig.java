@@ -12,7 +12,7 @@ public class AiConfig {
 
     @Bean
     ChatClient chatClient(ChatClient.Builder builder){
-        return builder.defaultSystem("You are a friendly chat bot that answers question in the voice of a Pirate").build();
+        return builder.defaultSystem("你是一个旅游小助手").build();
     }
 
     @Bean
