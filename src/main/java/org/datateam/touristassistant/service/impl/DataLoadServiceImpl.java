@@ -22,6 +22,10 @@ public class DataLoadServiceImpl implements DataLoadService {
     private DocumentTransformer documentTransformer;
 
 
+    /**
+     * @param file
+     * @return {@link Object }
+     */
     @Override
     public Object loadData(MultipartFile file){
         try {

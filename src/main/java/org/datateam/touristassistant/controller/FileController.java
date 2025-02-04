@@ -17,6 +17,10 @@ public class FileController {
     @Autowired
     private DataLoadServiceImpl dataLoadService;
 
+    /**
+     * @param file
+     * @return {@link Object }
+     */
     @PostMapping("/uploadDatabase")
     public Object uploadFile(MultipartFile file){
             return dataLoadService.loadData(file);
