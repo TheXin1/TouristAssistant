@@ -1,25 +1,17 @@
 package org.datateam.touristassistant.mapper;
 
-import org.apache.ibatis.annotations.*;
+import org.apache.ibatis.annotations.Mapper;
 import org.datateam.touristassistant.pojo.User;
-
-import java.util.List;
 
 @Mapper
 public interface UserMapper {
 
-    @Insert("INSERT INTO users(username, password_hash, email, phone) VALUES(#{username}, #{passwordHash}, #{email}, #{phone})")
-    void insertUser(User user);
+    // 根据 openid 查找用户
+    User findByOpenid(String openid);
 
-    @Select("SELECT * FROM users WHERE user_id = #{userId}")
-    User getUserById(Long userId);
+    // 插入新用户
+    int insertUser(User user);
 
-    @Select("SELECT * FROM users")
-    List<User> getAllUsers();
-
-    @Update("UPDATE users SET username = #{username}, password_hash = #{passwordHash}, email = #{email}, phone = #{phone}, updated_at = CURRENT_TIMESTAMP WHERE user_id = #{userId}")
-    void updateUser(User user);
-
-    @Delete("DELETE FROM users WHERE user_id = #{userId}")
-    void deleteUser(Long userId);
+    // 更新用户头像
+    int updateAvatar(String openid, String avatar_url);
 }

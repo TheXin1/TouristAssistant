@@ -6,36 +6,27 @@ import org.datateam.touristassistant.service.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import java.util.List;
-
 @Service
 public class UserServiceImpl implements UserService {
 
     @Autowired
     private UserMapper userMapper;
 
+    // 根据 openid 查找用户
     @Override
-    public void addUser(User user) {
+    public User findByOpenid(String openid) {
+        return userMapper.findByOpenid(openid);
+    }
+
+    // 注册新用户
+    @Override
+    public void registerNewUser(User user) {
         userMapper.insertUser(user);
     }
 
+    // 更新用户头像
     @Override
-    public User getUserById(Long userId) {
-        return userMapper.getUserById(userId);
-    }
-
-    @Override
-    public List<User> getAllUsers() {
-        return userMapper.getAllUsers();
-    }
-
-    @Override
-    public void updateUser(User user) {
-        userMapper.updateUser(user);
-    }
-
-    @Override
-    public void deleteUser(Long userId) {
-        userMapper.deleteUser(userId);
+    public void updateAvatar(String openid, String avatar_url) {
+        userMapper.updateAvatar(openid, avatar_url);
     }
 }

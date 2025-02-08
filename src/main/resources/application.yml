@@ -26,8 +26,12 @@ spring:
         initialize-schema: true
 
 mybatis:
-  configuration:
-    map-underscore-to-camel-case: true
+  config-location: classpath:mybatis-config.xml
+  mapper-locations: classpath:mapper/**/*.xml
+
+wechat:
+  appid: YOUR_APPID
+  secret: YOUR_APPSECRET
 
 wechat:
   appid: wx91e6a3712df5354b
