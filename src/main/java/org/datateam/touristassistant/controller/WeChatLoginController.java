@@ -23,6 +23,9 @@ public class WeChatLoginController {
     @Value("${wechat.secret}")
     private String secret;
 
+    @Autowired
+    private RestTemplate restTemplate;
+
     private static final String WECHAT_LOGIN_URL = "https://api.weixin.qq.com/sns/jscode2session";
 
     @Autowired
@@ -32,9 +35,7 @@ public class WeChatLoginController {
     public ResponseEntity<?> login(@RequestParam("code") String code, @RequestParam(value = "avatar_url", required = false) String avatarUrl) {
         // 调用微信 API 获取 openid
         String url = WECHAT_LOGIN_URL + "?appid=" + appid + "&secret=" + secret + "&js_code=" + code + "&grant_type=authorization_code";
-        RestTemplate restTemplate = new RestTemplate();
         String response = restTemplate.getForObject(url, String.class);
-
         // 解析 JSON 响应
         JSONObject jsonResponse = new JSONObject(response);
         if (!jsonResponse.has("openid")) {

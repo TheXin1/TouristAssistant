@@ -14,7 +14,7 @@ public class FilterConfig {
         registrationBean.setFilter(new JwtAuthenticationFilter());
 
         // 这里设置要过滤的路径，例如微信小程序接口
-        registrationBean.addUrlPatterns("/api/*");
+//        registrationBean.addUrlPatterns("/api/*"); //测试阶段注释掉
         return registrationBean;
     }
 }
