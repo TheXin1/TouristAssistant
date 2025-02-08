@@ -52,6 +52,7 @@ public class AiServiceImpl implements AiService {
     /**
      * @param message
      * @return {@link String }
+     *
      */
     @Override
     public String generate(String message) {
@@ -69,6 +70,7 @@ public class AiServiceImpl implements AiService {
     /**
      * @param message
      * @return {@link String }
+     *
      *///RAG嵌入聊天
     @Override
     public String generateRAG(String message) {
