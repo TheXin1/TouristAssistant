@@ -12,6 +12,7 @@ import org.springframework.web.client.RestTemplate;
 import org.json.JSONObject;
 import org.springframework.web.multipart.MultipartFile;
 
+import java.io.File;
 import java.util.Map;
 
 @RestController
@@ -33,7 +34,7 @@ public class WeChatLoginController {
     private UserService userService;
 
     @PostMapping("/register")
-    public ResponseEntity<?> login(@RequestParam(value = "avatar", required = false) MultipartFile avatar,@RequestParam(value = "nickname", required = false) String nickname,@RequestParam("code") String code) {
+    public ResponseEntity<?> login(@RequestParam(value = "avatar") MultipartFile avatar,@RequestParam(value = "nickname") String nickname,@RequestParam("code") String code) {
         // 调用微信 API 获取 openid
         String url = WECHAT_LOGIN_URL + "?appid=" + appid + "&secret=" + secret + "&js_code=" + code + "&grant_type=authorization_code";
         String response = restTemplate.getForObject(url, String.class);
@@ -56,7 +57,7 @@ public class WeChatLoginController {
             userService.registerNewUser(user);
 
         }
-        Map<String, Object> claims =Map.of("openid", openid, "avatar_url", user.getAvatar_url(), "nickname", user.getNickname());
+        Map<String, Object> claims =Map.of("openid", openid, "nickname", user.getNickname());
         // 生成 JWT token
         String token = JwtUtil.genToken(claims);
         Map<String,Object> results=Map.of("avatar", avatar, "nickname", user.getNickname(),"token",token);

@@ -37,11 +37,15 @@ public class UserServiceImpl implements UserService {
     @Override
     public String saveAvatar(MultipartFile avatar, String name) {
         try {
-            // 定义保存路径，这里以项目的根目录为例
-            String uploadDir = "avatars";
+            // 获取文件的原始扩展名
+            String originalFilename = avatar.getOriginalFilename();
+            String fileExtension = originalFilename.substring(originalFilename.lastIndexOf("."));
+
+            // 定义保存路径（相对路径，在resources目录下）
+            String uploadDir = "C:/Users/28033/Desktop/TouristAssistant/uploads/avatars/";
 
             // 设置文件的保存路径
-            File saveFile = new File(uploadDir + name);
+            File saveFile = new File(uploadDir + name + fileExtension);
 
             // 确保目录存在
             if (!saveFile.getParentFile().exists()) {
@@ -51,12 +55,13 @@ public class UserServiceImpl implements UserService {
             // 将文件保存到指定目录
             avatar.transferTo(saveFile);
 
-            // 返回保存的文件路径（可以是相对路径，也可以是绝对路径）
-            return uploadDir + name;
+            // 返回相对路径（浏览器可访问的路径）
+            return "/avatars/" + name + fileExtension;
         } catch (IOException e) {
             e.printStackTrace();
-            // 如果保存失败，可以返回空字符串或者其他默认值
-            return "";
+            // 返回失败信息或其他默认值
+            return "error";
         }
     }
+
 }
