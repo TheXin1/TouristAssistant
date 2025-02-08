@@ -28,11 +28,15 @@ public class JwtUtil {
                 .asMap();
     }
 
-    // 生成 token（仅存储 openid）
-    public static String generateToken(String openid) {
-        return JWT.create()
-                .withSubject(openid)
-                .withExpiresAt(new Date(System.currentTimeMillis() + EXPIRATION_TIME))
-                .sign(Algorithm.HMAC256(SECRET_KEY));
+    //验证JWT是否过期
+    public boolean isTokenExpiration(String token){
+        return getExpirationDateFromToken(token).before(new Date());
     }
+
+    //获取过期时间
+    private Date getExpirationDateFromToken(String token){
+        return JWT.decode(token).getExpiresAt();
+    }
+
+
 }

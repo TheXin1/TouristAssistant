@@ -5,7 +5,6 @@ import org.springframework.ai.chat.model.ChatModel;
 import org.springframework.ai.chat.model.ChatResponse;
 import org.springframework.ai.chat.prompt.Prompt;
 import org.springframework.ai.chat.prompt.PromptTemplate;
-import org.springframework.ai.chat.prompt.SystemPromptTemplate;
 import org.springframework.ai.document.Document;
 import org.springframework.ai.embedding.Embedding;
 import org.springframework.ai.embedding.EmbeddingModel;
@@ -88,7 +87,7 @@ public class AiServiceImpl implements AiService {
     }
 
     @Override
-    public String generateByPromote(String message,String promote){
+    public String generateByPromote(String message, String promote){
         List<Document> documents =vectorStore.similaritySearch(message);
 
         List<String> context = documents.stream().map(Document::getContent).toList();

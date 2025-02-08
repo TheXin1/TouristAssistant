@@ -6,5 +6,5 @@ import org.springframework.web.multipart.MultipartFile;
 
 public interface DataLoadService {
 
-    public Object loadData(MultipartFile file);
+    Object loadData(MultipartFile file);
 }

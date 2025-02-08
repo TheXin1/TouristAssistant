@@ -107,17 +107,6 @@
             <groupId>org.springframework.ai</groupId>
             <artifactId>spring-ai-tika-document-reader</artifactId>
         </dependency>
-        <!-- RestTemplate 支持 -->
-        <dependency>
-            <groupId>org.springframework.boot</groupId>
-            <artifactId>spring-boot-starter-webflux</artifactId>
-        </dependency>
-        <!-- JWT 支持 -->
-        <dependency>
-            <groupId>io.jsonwebtoken</groupId>
-            <artifactId>jjwt</artifactId>
-            <version>0.11.5</version>
-        </dependency>
 
         <dependency>
             <groupId>org.projectlombok</groupId>
@@ -125,9 +114,6 @@
             <version>1.18.24</version>
             <scope>provided</scope>
         </dependency>
-
-
-
     </dependencies>
     <dependencyManagement>
         <dependencies>

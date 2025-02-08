@@ -1,14 +1,17 @@
 package org.datateam.touristassistant.Filter;
 
 import jakarta.servlet.*;
+import jakarta.servlet.annotation.WebFilter;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import org.datateam.touristassistant.utils.JwtUtil;
+import org.springframework.core.annotation.Order;
 import org.springframework.stereotype.Component;
 
 import java.io.IOException;
 
-@Component
+@Order(1)
+@WebFilter(filterName = "myFilter1",urlPatterns = {"/api/*"})
 public class JwtAuthenticationFilter implements Filter {
 
     private JwtUtil jwtUtil = new JwtUtil();
