@@ -28,6 +28,8 @@ spring:
 wechat:
   appid: wx91e6a3712df5354b
   secret: 64e929552dfce9bb059c2cd93e45df46
+  avatar:
+    dir: ../public/img
 
 mybatis:
   mapper-locations: classpath:/mapper/*.xml
