@@ -8,7 +8,7 @@ import org.springframework.boot.web.servlet.ServletComponentScan;
 
 @SpringBootApplication
 @MapperScan("org.datateam.touristassistant.mapper")
-@ServletComponentScan
+/*@ServletComponentScan  //测试阶段关闭拦截器*/
 public class TouristAssistantApplication {
 
     public static void main(String[] args) {

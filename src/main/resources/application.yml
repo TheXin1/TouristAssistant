@@ -28,6 +28,7 @@ spring:
 wechat:
   appid: wx91e6a3712df5354b
   secret: 64e929552dfce9bb059c2cd93e45df46
+  avatarPath: "C:/Users/28033/Desktop/TouristAssistant/uploads/avatars/"
 
 mybatis:
   mapper-locations: classpath:/mapper/*.xml

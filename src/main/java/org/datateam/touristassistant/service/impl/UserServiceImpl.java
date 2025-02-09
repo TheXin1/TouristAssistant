@@ -4,6 +4,7 @@ import org.datateam.touristassistant.mapper.UserMapper;
 import org.datateam.touristassistant.pojo.User;
 import org.datateam.touristassistant.service.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -15,6 +16,9 @@ public class UserServiceImpl implements UserService {
 
     @Autowired
     private UserMapper userMapper;
+
+    @Value("${wechat.avatarPath}")
+    private String avatarPath;
 
     // 根据 openid 查找用户
     @Override
@@ -41,11 +45,8 @@ public class UserServiceImpl implements UserService {
             String originalFilename = avatar.getOriginalFilename();
             String fileExtension = originalFilename.substring(originalFilename.lastIndexOf("."));
 
-            // 定义保存路径（相对路径，在resources目录下）
-            String uploadDir = "C:/Users/28033/Desktop/TouristAssistant/uploads/avatars/";
-
             // 设置文件的保存路径
-            File saveFile = new File(uploadDir + name + fileExtension);
+            File saveFile = new File(avatarPath + name + fileExtension);
 
             // 确保目录存在
             if (!saveFile.getParentFile().exists()) {
@@ -55,8 +56,8 @@ public class UserServiceImpl implements UserService {
             // 将文件保存到指定目录
             avatar.transferTo(saveFile);
 
-            // 返回相对路径（浏览器可访问的路径）
-            return "/avatars/" + name + fileExtension;
+            // 返回相对路径(浏览器访问数据)
+            return avatarPath + name + fileExtension;
         } catch (IOException e) {
             e.printStackTrace();
             // 返回失败信息或其他默认值

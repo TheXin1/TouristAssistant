@@ -1,6 +1,8 @@
 package org.datateam.touristassistant.service.impl;
 
+
 import org.datateam.touristassistant.service.AiService;
+import org.springframework.ai.chat.client.ChatClient;
 import org.springframework.ai.chat.model.ChatModel;
 import org.springframework.ai.chat.model.ChatResponse;
 import org.springframework.ai.chat.prompt.Prompt;
@@ -15,9 +17,12 @@ import org.springframework.ai.openai.OpenAiEmbeddingOptions;
 import org.springframework.ai.vectorstore.VectorStore;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import reactor.core.publisher.Flux;
 
 import java.util.List;
 import java.util.Map;
+
+import static groovy.json.JsonOutput.toJson;
 
 
 @Service
@@ -25,6 +30,9 @@ public class AiServiceImpl implements AiService {
 
     @Autowired
     private ChatModel chatModel;
+
+    @Autowired
+    private ChatClient chatClient;
 
     @Autowired
     private EmbeddingModel embeddingModel;
@@ -45,14 +53,6 @@ public class AiServiceImpl implements AiService {
             "3. **玩乐推荐**：推荐该地点的娱乐活动和独特体验，包括户外活动、夜生活、文化体验等，确保让答案具有吸引力，能够激发游客前往的兴趣。\n" +
             "回答时尽量使内容有层次感、感性丰富，同时要令读者产生亲身体验的欲望。尽量让每部分内容有具体的例子，并通过生动的细节吸引读者。";
 
-
-
-
-    /**
-     * @param message
-     * @return {@link String }
-     *
-     */
     @Override
     public String generate(String message) {
         ChatResponse response= chatModel.call(
@@ -69,10 +69,9 @@ public class AiServiceImpl implements AiService {
     /**
      * @param message
      * @return {@link String }
-     *
      *///RAG嵌入聊天
     @Override
-    public String generateRAG(String message) {
+    public Flux<String> generateRAG(String message) {
         List<Document> documents =vectorStore.similaritySearch(message);
 
         List<String> context = documents.stream().map(Document::getContent).toList();
@@ -80,14 +79,18 @@ public class AiServiceImpl implements AiService {
         PromptTemplate promptTemplate=new PromptTemplate(PROMPT_BLUEPRINT);
 
         Prompt p = promptTemplate.create(Map.of("context", context, "query", message));
-        System.out.println(p);
+        /*System.out.println(p);
         ChatResponse response= chatModel.call(p);
 
-        return response.getResult().getOutput().getContent();
+        return response.getResult().getOutput().getContent();*/
+
+        return chatClient.prompt(p).stream().content();
+
+
     }
 
     @Override
-    public String generateByPromote(String message, String promote){
+    public Flux<String> generateByPromote(String message, String promote){
         List<Document> documents =vectorStore.similaritySearch(message);
 
         List<String> context = documents.stream().map(Document::getContent).toList();
@@ -95,24 +98,22 @@ public class AiServiceImpl implements AiService {
         PromptTemplate promptTemplate=new PromptTemplate(promote);
 
         Prompt p = promptTemplate.create(Map.of("context", context, "query", message));
-        System.out.println(p);
-        ChatResponse response= chatModel.call(p);
 
-        return response.getResult().getOutput().getContent();
+        /*ChatResponse response= chatModel.call(p);
+
+        return response.getResult().getOutput().getContent();*/
+
+        return chatClient.prompt(p).stream().content();
     }
 
     //生成旅行计划
     @Override
-    public String generatePlan(String message) {
+    public Flux<String> generatePlan(String message) {
         return generateByPromote(message,PROMPT_BLUEPRINT+"\n\n"+PROMPT_PLAN);
     }
 
 
-    /**
-     * @param text
-     * @return {@link List }<{@link Float }>
-     * 用于获取文本的向量化值(运用openai api)
-     */
+
     public List<Embedding> getEmbedding(String text){
         EmbeddingResponse  embeddingResponse=embeddingModel.call(
                 new EmbeddingRequest(List.of(text),

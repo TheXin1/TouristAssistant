@@ -60,9 +60,8 @@ public class WeChatLoginController {
         Map<String, Object> claims =Map.of("openid", openid, "nickname", user.getNickname());
         // 生成 JWT token
         String token = JwtUtil.genToken(claims);
-        Map<String,Object> results=Map.of("avatar", avatar, "nickname", user.getNickname(),"token",token);
+        Map<String,Object> results=Map.of("avatar", user.getAvatar_url(), "nickname", user.getNickname(),"token",token);
         return ResponseEntity.ok(new Results(200,true,"注册成功",results));
-
     }
 
 
