@@ -1,8 +1,12 @@
 package org.datateam.touristassistant.controller;
 
+import org.apache.ibatis.annotations.Param;
 import org.datateam.touristassistant.service.impl.AiServiceImpl;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.messaging.handler.annotation.MessageMapping;
+import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.reactive.function.client.WebClient;
 import reactor.core.publisher.Flux;
 
 @RestController
@@ -10,7 +14,6 @@ import reactor.core.publisher.Flux;
 public class AiController {
     @Autowired
     private AiServiceImpl aiService;
-
 
     @RequestMapping("/chatTest")
     public String chatTest(String message){
@@ -28,6 +31,13 @@ public class AiController {
     public Flux<String> chatPlan(String message){
         return aiService.generatePlan(message);
     }
+
+
+    @MessageMapping("/chat")
+    public void sendMessage(@Param(value = "Authorization") String token, @Param(value = "message") String message){
+
+    }
+
 
 
 }

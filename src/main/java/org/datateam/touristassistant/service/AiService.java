@@ -12,4 +12,6 @@ public interface AiService {
 
     //生成旅行计划
     Flux<String> generatePlan(String message);
+
+
 }

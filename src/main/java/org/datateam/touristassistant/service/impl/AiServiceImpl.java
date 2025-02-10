@@ -1,6 +1,8 @@
 package org.datateam.touristassistant.service.impl;
 
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import jakarta.annotation.Resource;
 import org.datateam.touristassistant.service.AiService;
 import org.springframework.ai.chat.client.ChatClient;
 import org.springframework.ai.chat.model.ChatModel;
@@ -19,8 +21,10 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import reactor.core.publisher.Flux;
 
+import java.time.Duration;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.Semaphore;
 
 import static groovy.json.JsonOutput.toJson;
 
@@ -39,6 +43,9 @@ public class AiServiceImpl implements AiService {
 
     @Autowired
     private VectorStore vectorStore;
+
+    @Resource
+    private AiWebsocketService aiWebsocketService;
 
     private final String PROMPT_BLUEPRINT = "请根据提供的上下文信息并适当检索，针对问题提供富有吸引力且人性化的回答。在回答时，请尽量融入一些形容词和修饰词，使内容更加生动、有趣，同时让回答自然流畅。如果上下文中没有相关信息，请提供一个合理且富有创意的回答，令读者感受到亲切和贴心。上下文：\n" +
             "{context}\n" +
@@ -81,12 +88,8 @@ public class AiServiceImpl implements AiService {
         Prompt p = promptTemplate.create(Map.of("context", context, "query", message));
         /*System.out.println(p);
         ChatResponse response= chatModel.call(p);
-
         return response.getResult().getOutput().getContent();*/
-
         return chatClient.prompt(p).stream().content();
-
-
     }
 
     @Override
@@ -112,6 +115,25 @@ public class AiServiceImpl implements AiService {
         return generateByPromote(message,PROMPT_BLUEPRINT+"\n\n"+PROMPT_PLAN);
     }
 
+    public Flux<String> answer(String message){
+
+        Flux<String> chatResponseFlux = generatePlan(message);
+
+        chatResponseFlux.delayElements(Duration.ofMillis(50)).subscribe(chunk ->{
+            aiWebsocketService.sendMessage(chunk,"1");
+        });
+
+        return null;
+    }
+
+    public static class Message {
+        private String sender;
+        private String content;
+
+        // 构造函数，getter 和 setter
+    }
+
+
 
 
     public List<Embedding> getEmbedding(String text){
@@ -122,6 +144,8 @@ public class AiServiceImpl implements AiService {
 
         return embeddingResponse.getResults();
     }
+
+
 
 
 
