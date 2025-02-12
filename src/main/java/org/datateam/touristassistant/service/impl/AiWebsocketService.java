@@ -19,6 +19,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.config.AutowireCapableBeanFactory;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnClass;
+import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Component;
 import org.springframework.web.socket.server.standard.SpringConfigurator;
 import reactor.core.publisher.Flux;
@@ -27,7 +28,9 @@ import java.io.IOException;
 import java.time.Duration;
 import java.time.LocalDateTime;
 import java.util.Map;
+import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.Semaphore;
 
 
 @Component
@@ -57,17 +60,18 @@ public class AiWebsocketService {
     public void onOpen(Session session, @PathParam("token") String token) {
         this.session = session;
 
-        //验证token
+       /* //验证token
         if(token==null || token.isEmpty() || JwtUtil.isTokenExpiration(token)){
             try {
                 session.close();
             } catch (IOException e) {
                 logger.error("连接失败", e);
             }
-        }
+        }*/
         this.aiService = beanFactory.getBean(AiServiceImpl.class);
         this.messageMapper=beanFactory.getBean(MessageMapper.class);
-        session.getUserProperties().put("openid", JwtUtil.parseToken(token).get("openid"));
+        /*session.getUserProperties().put("openid", JwtUtil.parseToken(token).get("openid"));*/
+        session.getUserProperties().put("openid",token);
         logger.info("有新的 WebSocket 连接进入");
     }
 
@@ -92,6 +96,7 @@ public class AiWebsocketService {
             //拿到content
             String content = msgContent.getContent();
 
+
             Flux<String> flux;
             if (isTouristPlanningRelated(content)) {
                 flux = aiService.generatePlan(content);
@@ -100,6 +105,8 @@ public class AiWebsocketService {
                 //对话逻辑
                 flux = aiService.generateRAG(content);
                 //发送得到回应
+                // 设置同步信号量
+                Semaphore semaphore = new Semaphore(0);
                 flux.delayElements(Duration.ofMillis(50)).subscribe(chunk -> {
                     sb.append(chunk);
                     MessageContent responseContent = new MessageContent();
@@ -109,20 +116,32 @@ public class AiWebsocketService {
                     responseContent.setContent(chunk);
                     responseContent.setPolyline(new MessageContent.Polyline(false,null));
                     sendMessage(responseContent);
-                });
+                }, error -> {
+                            semaphore.release();
+                        }, // 失败释放信号量
+                        semaphore::release// 成功释放信号量
+                       );
+
+                semaphore.acquire();
+                logger.info(sb.toString());
+                //持久层代码
+                String openid= (String) session.getUserProperties().get("openid");
+                insertMessageAsync(new Message(openid,sb.toString(),"assistant",nowTime));
+
             }
-
-            //持久层代码
-            String openid= (String) session.getUserProperties().get("openid");
-            Message result=new Message(openid,sb.toString(),"assistant",nowTime);
-            messageMapper.insertMessage(result);
-
 
 
         } catch (Exception e) {
             logger.error("处理消息时发生错误", e);
         }
 
+    }
+
+    //异步插入
+    @Async
+    public CompletableFuture<Void> insertMessageAsync(Message result) {
+        messageMapper.insertMessage(result);
+        return CompletableFuture.completedFuture(null);
     }
 
     // 通过 WebSocket 发送消息
