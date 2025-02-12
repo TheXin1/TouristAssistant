@@ -29,13 +29,13 @@ public class JwtUtil {
                 .asMap();
     }
 
-    //验证JWT是否过期
-    public boolean isTokenExpiration(String token){
+    //验证JWT是否过期过期true,未过期false
+    public static boolean isTokenExpiration(String token){
         return getExpirationDateFromToken(token).before(new Date());
     }
 
     //获取过期时间
-    private Date getExpirationDateFromToken(String token){
+    private static Date getExpirationDateFromToken(String token){
         return JWT.decode(token).getExpiresAt();
     }
 

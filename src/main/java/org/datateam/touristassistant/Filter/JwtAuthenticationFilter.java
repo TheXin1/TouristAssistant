@@ -14,8 +14,6 @@ import java.io.IOException;
 @WebFilter(filterName = "myFilter1",urlPatterns = {"/api/*"})
 public class JwtAuthenticationFilter implements Filter {
 
-    private JwtUtil jwtUtil = new JwtUtil();
-
     @Override
     public void init(FilterConfig filterConfig) throws ServletException {
     }
@@ -47,7 +45,7 @@ public class JwtAuthenticationFilter implements Filter {
     private boolean isValidToken(String token) {
         try {
             // 检查 JWT
-            if (jwtUtil.isTokenExpiration(token)) {
+            if (JwtUtil.isTokenExpiration(token)) {
                 return false; // Token 已过期
             }
             return true;

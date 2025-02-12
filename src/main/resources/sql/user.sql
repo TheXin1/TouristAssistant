@@ -6,3 +6,12 @@ CREATE TABLE user (
                       create_time TIMESTAMP DEFAULT CURRENT_TIMESTAMP,  -- 创建时间，默认当前时间
                       update_time TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP  -- 更新时间，每次更新时会自动更新
 );
+
+CREATE TABLE IF NOT EXISTS message (
+                                       id INT AUTO_INCREMENT PRIMARY KEY,
+                                       openid VARCHAR(255) NOT NULL,
+                                       content TEXT NOT NULL,
+                                       type VARCHAR(255) NOT NULL,
+                                       time TIMESTAMP DEFAULT CURRENT_TIMESTAMP NOT NULL,
+                                       FOREIGN KEY (openid) REFERENCES user(openid)
+);

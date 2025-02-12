@@ -1,6 +1,8 @@
 package org.datateam.touristassistant.service.impl;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.graphbuilder.curve.Polyline;
 import jakarta.websocket.OnClose;
 import jakarta.websocket.OnMessage;
 import jakarta.websocket.OnOpen;
@@ -8,6 +10,8 @@ import jakarta.websocket.Session;
 import jakarta.websocket.server.PathParam;
 import jakarta.websocket.server.ServerEndpoint;
 import org.datateam.touristassistant.config.WebSocketConfig;
+import org.datateam.touristassistant.mapper.MessageMapper;
+import org.datateam.touristassistant.pojo.Message;
 import org.datateam.touristassistant.pojo.MessageContent;
 import org.datateam.touristassistant.utils.JwtUtil;
 import org.slf4j.Logger;
@@ -21,9 +25,9 @@ import reactor.core.publisher.Flux;
 
 import java.io.IOException;
 import java.time.Duration;
+import java.time.LocalDateTime;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
-
 
 
 @Component
@@ -33,49 +37,37 @@ public class AiWebsocketService {
     private final Logger logger = LoggerFactory.getLogger(AiWebsocketService.class);
     private Session session;
 
-    private final JwtUtil jwtUtil=new JwtUtil();
+    private final ObjectMapper objectMapper = new ObjectMapper();
 
-    private final ObjectMapper objectMapper=new ObjectMapper();
-
-//    // 存放所有的 WebSocket 连接
+//     存放所有的 WebSocket 连接
 //    private static Map<String, AiWebsocketService> aiWebSocketServicesMap = new ConcurrentHashMap<>();
 
     private static AutowireCapableBeanFactory beanFactory;
-
     @Autowired
     public void setBeanFactory(AutowireCapableBeanFactory beanFactory) {
         AiWebsocketService.beanFactory = beanFactory;
     }
 
     private AiServiceImpl aiService;
+
+    private MessageMapper messageMapper;
+
     // 新连接时调用
     @OnOpen
-    public void onOpen(Session session,@PathParam("token") String token) {
+    public void onOpen(Session session, @PathParam("token") String token) {
         this.session = session;
+
+        //验证token
+        if(token==null || token.isEmpty() || JwtUtil.isTokenExpiration(token)){
+            try {
+                session.close();
+            } catch (IOException e) {
+                logger.error("连接失败", e);
+            }
+        }
         this.aiService = beanFactory.getBean(AiServiceImpl.class);
-//验证token
-/*        if (token == null || token.isEmpty()) {
-            logger.error("Token 无效");
-            try {
-                session.close();  // 如果 token 无效，关闭连接
-            } catch (IOException e) {
-                logger.error("关闭 WebSocket 连接失败", e);
-            }
-            return;
-        }
-
-        if (jwtUtil.isTokenExpiration(token)) {
-            logger.error("Token 过期");
-            try {
-                session.close();  // 如果 token 过期，关闭连接
-            } catch (IOException e) {
-                logger.error("关闭 WebSocket 连接失败", e);
-            }
-            return;
-        }
-
-        String id = (String) jwtUtil.parseToken(token).get("openid");
-        aiWebSocketServicesMap.put(id, this);  // 将连接保存到 map 中*/
+        this.messageMapper=beanFactory.getBean(MessageMapper.class);
+        session.getUserProperties().put("openid", JwtUtil.parseToken(token).get("openid"));
         logger.info("有新的 WebSocket 连接进入");
     }
 
@@ -94,19 +86,38 @@ public class AiWebsocketService {
     public void onMessage(String message) {
         try {
             logger.info("接收到消息: " + message);
-            MessageContent msgContent= objectMapper.readValue(message,MessageContent.class);
-
-            //持久层代码
-
+            MessageContent msgContent = objectMapper.readValue(message, MessageContent.class);
+            StringBuilder sb=new StringBuilder();
+            LocalDateTime nowTime = LocalDateTime.now();
             //拿到content
             String content = msgContent.getContent();
 
-            //发送得到回应
-            Flux<String> flux = aiService.generateRAG(content);
+            Flux<String> flux;
+            if (isTouristPlanningRelated(content)) {
+                flux = aiService.generatePlan(content);
+                //具体规划逻辑
+            } else {
+                //对话逻辑
+                flux = aiService.generateRAG(content);
+                //发送得到回应
+                flux.delayElements(Duration.ofMillis(50)).subscribe(chunk -> {
+                    sb.append(chunk);
+                    MessageContent responseContent = new MessageContent();
+                    responseContent.setHasSlice(true);
+                    responseContent.setType("assistant");
+                    responseContent.setTime(nowTime.toString());
+                    responseContent.setContent(chunk);
+                    responseContent.setPolyline(new MessageContent.Polyline(false,null));
+                    sendMessage(responseContent);
+                });
+            }
 
-            flux.delayElements(Duration.ofMillis(50)).subscribe(chunk ->{
-                sendMessage(chunk);
-            });
+            //持久层代码
+            String openid= (String) session.getUserProperties().get("openid");
+            Message result=new Message(openid,sb.toString(),"assistant",nowTime);
+            messageMapper.insertMessage(result);
+
+
 
         } catch (Exception e) {
             logger.error("处理消息时发生错误", e);
@@ -115,17 +126,38 @@ public class AiWebsocketService {
     }
 
     // 通过 WebSocket 发送消息
-    public void sendMessage(String message) {
+    public void sendMessage(MessageContent messageContent) {
 /*        AiWebsocketService aiWebsocketService = aiWebSocketServicesMap.get(id);
         if (aiWebsocketService == null) {
             logger.warn("用户ID：" + id + " 对应的连接不存在");
             return;
         }*/
+
         try {
-            session.getBasicRemote().sendText(message);  // 发送消息
-            logger.debug("消息发送成功: " + message);
+            String jsonMessage = objectMapper.writeValueAsString(messageContent);
+            // 发送消息
+            session.getBasicRemote().sendText(jsonMessage);
+            logger.debug("消息发送成功: " + jsonMessage);
         } catch (IOException e) {
             logger.error("发送消息失败: " + e.getClass() + ": " + e.getMessage());
         }
+
     }
+
+    // 判断消息是否与旅游规划相关
+    private boolean isTouristPlanningRelated(String content) {
+        String[] keywords = {
+                "旅游规划", "行程规划", "旅游路线", "路线设计", "旅游建议",
+                "旅行路线", "旅行计划", "旅游计划", "行程安排", "推荐路线",
+                "景点推荐", "旅行路线规划", "旅行设计"
+        };
+
+        for (String keyword : keywords) {
+            if (content.contains(keyword)) {
+                return true;
+            }
+        }
+        return false;
+    }
+
 }

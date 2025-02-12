@@ -65,6 +65,14 @@ public class MessageContent {
         private boolean isPolyline;
         private String[] polyline;
 
+        public Polyline() {
+        }
+
+        public Polyline(boolean isPolyline, String[] polyline) {
+            this.isPolyline = isPolyline;
+            this.polyline = polyline;
+        }
+
         public boolean getIsPolyline() {
             return isPolyline;
         }
