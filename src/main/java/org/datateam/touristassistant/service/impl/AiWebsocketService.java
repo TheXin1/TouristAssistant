@@ -27,6 +27,7 @@ import reactor.core.publisher.Flux;
 import java.io.IOException;
 import java.time.Duration;
 import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.Map;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ConcurrentHashMap;
@@ -91,11 +92,17 @@ public class AiWebsocketService {
         try {
             logger.info("接收到消息: " + message);
             MessageContent msgContent = objectMapper.readValue(message, MessageContent.class);
+            String openid= (String) session.getUserProperties().get("openid");
+
             StringBuilder sb=new StringBuilder();
             LocalDateTime nowTime = LocalDateTime.now();
             //拿到content
             String content = msgContent.getContent();
 
+            DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
+
+            insertMessageAsync(new Message(openid,content,msgContent.getType()
+                    ,LocalDateTime.parse(msgContent.getTime(), formatter)));
 
             Flux<String> flux;
             if (isTouristPlanningRelated(content)) {
@@ -125,7 +132,7 @@ public class AiWebsocketService {
                 semaphore.acquire();
                 logger.info(sb.toString());
                 //持久层代码
-                String openid= (String) session.getUserProperties().get("openid");
+
                 insertMessageAsync(new Message(openid,sb.toString(),"assistant",nowTime));
 
             }

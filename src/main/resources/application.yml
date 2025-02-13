@@ -34,3 +34,5 @@ mybatis:
   mapper-locations: classpath:/mapper/*.xml
   type-aliases-package: org.datateam.touristassistant.pojo
 
+
+
