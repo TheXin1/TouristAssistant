@@ -1,15 +1,15 @@
 <?xml version="1.0" encoding="UTF-8" ?>
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
         "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
-<mapper namespace="com.example.mapper.MapMarkerMapper">
+<mapper namespace="org.datateam.touristassistant.mapper.MapMarkerMapper">
 
     <!-- 查询所有标记点 -->
-    <select id="getAllMarkers" resultType="com.example.model.MapMarker">
+    <select id="getAllMarkers" resultType="org.datateam.touristassistant.pojo.MapMarker">
         SELECT * FROM map_marker
     </select>
 
     <!-- 插入标记点 -->
-    <insert id="insertMarker" parameterType="com.example.model.MapMarker" useGeneratedKeys="true" keyProperty="id">
+    <insert id="insertMarker" parameterType="org.datateam.touristassistant.pojo.MapMarker" useGeneratedKeys="true" keyProperty="id">
         INSERT INTO map_marker (latitude, longitude, title, icon_path, width, height)
         VALUES (#{latitude}, #{longitude}, #{title}, #{iconPath}, #{width}, #{height})
     </insert>

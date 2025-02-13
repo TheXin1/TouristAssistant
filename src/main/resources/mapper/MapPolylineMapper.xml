@@ -1,15 +1,15 @@
 <?xml version="1.0" encoding="UTF-8" ?>
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
         "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
-<mapper namespace="com.example.mapper.MapPolylineMapper">
+<mapper namespace="org.datateam.touristassistant.mapper.MapPolylineMapper">
 
     <!-- 查询所有路线 -->
-    <select id="getAllPolylines" resultType="com.example.model.MapPolyline">
+    <select id="getAllPolylines" resultType="org.datateam.touristassistant.pojo.MapPolyline">
         SELECT * FROM polyline
     </select>
 
     <!-- 插入路线 -->
-    <insert id="insertPolyline" parameterType="com.example.model.MapPolyline" useGeneratedKeys="true" keyProperty="id">
+    <insert id="insertPolyline" parameterType="org.datateam.touristassistant.pojo.MapPolyline" useGeneratedKeys="true" keyProperty="id">
         INSERT INTO polyline (color, width, arrow_line, border_width)
         VALUES (#{color}, #{width}, #{arrowLine}, #{borderWidth})
     </insert>
