@@ -27,8 +27,6 @@ public class WeChatLoginController {
     @Value("${wechat.secret}")
     private String secret;
 
-    @Value("${wechat.avatar.dir}")
-    private String avatarDir;
 
     @Autowired
     private RestTemplate restTemplate;

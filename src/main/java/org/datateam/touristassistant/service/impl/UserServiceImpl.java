@@ -42,7 +42,7 @@ public class UserServiceImpl implements UserService {
             String fileExtension = originalFilename.substring(originalFilename.lastIndexOf("."));
 
             // 定义保存路径（相对路径，在resources目录下）
-            String uploadDir = "C:/Users/28033/Desktop/TouristAssistant/uploads/avatars/";
+            String uploadDir = "../../../resources/public/img";
 
             // 设置文件的保存路径
             File saveFile = new File(uploadDir + name + fileExtension);
