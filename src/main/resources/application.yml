@@ -3,7 +3,7 @@ spring:
     driver-class-name: com.mysql.cj.jdbc.Driver
     url: jdbc:mysql://localhost:3306/tourist_assistant?useSSL=false&serverTimezone=UTC&useUnicode=true&characterEncoding=utf8
     username: root
-    password: 1234
+    password: root
   application:
     name: TouristAssistant
 
@@ -34,5 +34,8 @@ mybatis:
   mapper-locations: classpath:/mapper/*.xml
   type-aliases-package: org.datateam.touristassistant.pojo
 
+tencent:
+  map:
+    key: IEHBZ-XVLK4-3XTUF-FW2XR-3P7ES-SPBDO
 
 

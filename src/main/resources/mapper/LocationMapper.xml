@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="org.datateam.touristassistant.mapper.LocationMapper">
+    <insert id="insertLocation" parameterType="org.datateam.touristassistant.pojo.Location">
+        INSERT INTO location(address, latitude, longitude)
+        VALUES(#{address}, #{latitude}, #{longitude})
+    </insert>
+
+    <select id="findByAddress" resultType="org.datateam.touristassistant.pojo.Location" parameterType="String">
+        SELECT * FROM location WHERE address = #{address}
+    </select>
+</mapper>
