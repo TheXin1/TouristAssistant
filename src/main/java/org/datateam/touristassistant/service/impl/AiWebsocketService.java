@@ -56,6 +56,8 @@ public class AiWebsocketService {
 
     private MessageMapper messageMapper;
 
+    private TencentMapServiceImpl tencentMapService;
+
     // 新连接时调用
     @OnOpen
     public void onOpen(Session session, @PathParam("token") String token) {
@@ -71,6 +73,7 @@ public class AiWebsocketService {
         }*/
         this.aiService = beanFactory.getBean(AiServiceImpl.class);
         this.messageMapper=beanFactory.getBean(MessageMapper.class);
+        this.tencentMapService=beanFactory.getBean(TencentMapServiceImpl.class);
         /*session.getUserProperties().put("openid", JwtUtil.parseToken(token).get("openid"));*/
         session.getUserProperties().put("openid",token);
         logger.info("有新的 WebSocket 连接进入");
@@ -108,6 +111,8 @@ public class AiWebsocketService {
             if (isTouristPlanningRelated(content)) {
                 flux = aiService.generatePlan(content);
                 //具体规划逻辑
+
+
             } else {
                 //对话逻辑
                 flux = aiService.generateRAG(content);
