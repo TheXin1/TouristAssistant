@@ -9,4 +9,10 @@
         insert into message(openid,content,type,time)
         values (#{openid},#{content},#{type},#{time})
     </insert>
+    <select id="selectMessage">
+
+    </select>
+    <select id="selectMessageByOpenid">
+        select * from message where openid = #{openid}
+    </select>
 </mapper>
