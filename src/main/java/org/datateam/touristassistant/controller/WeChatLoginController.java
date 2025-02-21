@@ -74,6 +74,7 @@ public class WeChatLoginController {
                     "nickname", user.getNickname(),
                     "token", token
             );
+
             return ResponseEntity.ok(new Results(200, true, "登录成功", results));
         }
     }

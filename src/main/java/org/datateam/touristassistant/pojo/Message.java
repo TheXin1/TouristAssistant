@@ -7,7 +7,7 @@ import java.time.LocalDateTime;
 
 
 public class Message {
-    private int id;
+    private Long id;
     private String openid;
     private String content;
     private String type;
@@ -23,12 +23,12 @@ public class Message {
         this.time = time;
     }
 
-    public int getId() {
+    public long getId() {
         return id;
     }
 
-    public void setId(int id) {
-        this.id = id;
+    public void setId(Long id) {
+        this.id =  id;
     }
 
     public String getOpenid() {

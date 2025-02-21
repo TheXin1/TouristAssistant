@@ -9,7 +9,7 @@ import org.springframework.web.bind.annotation.*;
 import java.util.List;
 
 @RestController
-@RequestMapping("/wechat/map")
+@RequestMapping("/api/wechat/map")
 public class MapController {
     @Autowired
     private MapService mapService;

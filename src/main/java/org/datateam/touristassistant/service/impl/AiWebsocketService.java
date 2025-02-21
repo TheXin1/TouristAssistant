@@ -11,9 +11,12 @@ import jakarta.websocket.server.PathParam;
 import jakarta.websocket.server.ServerEndpoint;
 import org.datateam.touristassistant.config.WebSocketConfig;
 import org.datateam.touristassistant.mapper.MessageMapper;
+import org.datateam.touristassistant.pojo.Itinerary;
+import org.datateam.touristassistant.pojo.Location;
 import org.datateam.touristassistant.pojo.Message;
 import org.datateam.touristassistant.pojo.MessageContent;
 import org.datateam.touristassistant.utils.JwtUtil;
+import org.datateam.touristassistant.utils.SnowFlakeUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -28,6 +31,8 @@ import java.io.IOException;
 import java.time.Duration;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Map;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ConcurrentHashMap;
@@ -98,19 +103,68 @@ public class AiWebsocketService {
             String openid= (String) session.getUserProperties().get("openid");
 
             StringBuilder sb=new StringBuilder();
+            //时间
             LocalDateTime nowTime = LocalDateTime.now();
             //拿到content
             String content = msgContent.getContent();
 
-            DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
-
             insertMessageAsync(new Message(openid,content,msgContent.getType()
-                    ,LocalDateTime.parse(msgContent.getTime(), formatter)));
+                    ,nowTime));
 
             Flux<String> flux;
+
+            MessageContent responseContent = new MessageContent();
+            //id
+            long id=SnowFlakeUtil.getID();
+            //基础字段
+            responseContent.setId(id);
+            responseContent.setHasSlice(true);
+            responseContent.setType("assistant");
+            responseContent.setTime(nowTime.toString());
+            responseContent.setPolyline(new MessageContent.Polyline(false,null));
+
             if (isTouristPlanningRelated(content)) {
                 flux = aiService.generatePlan(content);
                 //具体规划逻辑
+                Semaphore semaphore =new Semaphore(0);
+                //id
+                flux.delayElements(Duration.ofMillis(50)).subscribe(chunk->{
+                    sb.append(chunk);
+                    responseContent.setContent(chunk);
+                    sendMessage(responseContent);
+                    }, error -> {
+                            semaphore.release();
+                        }, // 失败释放信号量
+                        semaphore::release// 成功释放信号量
+                );
+
+                semaphore.acquire();
+                insertMessageAsync(new Message(openid,sb.toString(),"assistant",nowTime));
+
+                Itinerary point=aiService.getPoint(sb.toString());
+
+                logger.info(point.toString());
+
+                //目前只拿第一天
+                List<String> route = point.getItinerary().get(0).getRoute();
+
+
+
+                List<List<Double>> xy =new ArrayList<>();
+
+
+                for (String s:route){
+                    ArrayList<Double> temp=new ArrayList<>();
+
+                    Location locationByAddress = tencentMapService.getLocationByAddress(s);
+
+                    temp.add(locationByAddress.getLatitude());
+                    temp.add(locationByAddress.getLongitude());
+                    xy.add(temp);
+                }
+                responseContent.setPolyline(new MessageContent.Polyline(true,xy));
+                sendMessage(responseContent);
+
 
 
             } else {
@@ -121,12 +175,7 @@ public class AiWebsocketService {
                 Semaphore semaphore = new Semaphore(0);
                 flux.delayElements(Duration.ofMillis(50)).subscribe(chunk -> {
                     sb.append(chunk);
-                    MessageContent responseContent = new MessageContent();
-                    responseContent.setHasSlice(true);
-                    responseContent.setType("assistant");
-                    responseContent.setTime(nowTime.toString());
                     responseContent.setContent(chunk);
-                    responseContent.setPolyline(new MessageContent.Polyline(false,null));
                     sendMessage(responseContent);
                 }, error -> {
                             semaphore.release();
@@ -176,11 +225,11 @@ public class AiWebsocketService {
     }
 
     // 判断消息是否与旅游规划相关
+    //可以替换为ai识别
     private boolean isTouristPlanningRelated(String content) {
         String[] keywords = {
-                "旅游规划", "行程规划", "旅游路线", "路线设计", "旅游建议",
-                "旅行路线", "旅行计划", "旅游计划", "行程安排", "推荐路线",
-                "景点推荐", "旅行路线规划", "旅行设计"
+                "规划", "设计", "建议",
+                "路线", "计划", "安排", "推荐"
         };
 
         for (String keyword : keywords) {

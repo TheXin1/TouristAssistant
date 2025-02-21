@@ -1,14 +1,18 @@
 package org.datateam.touristassistant.service.impl;
 
 
-import com.fasterxml.jackson.core.JsonProcessingException;
-import jakarta.annotation.Resource;
+import lombok.extern.slf4j.Slf4j;
+import org.datateam.touristassistant.pojo.Itinerary;
 import org.datateam.touristassistant.service.AiService;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.ai.chat.client.ChatClient;
 import org.springframework.ai.chat.model.ChatModel;
 import org.springframework.ai.chat.model.ChatResponse;
 import org.springframework.ai.chat.prompt.Prompt;
 import org.springframework.ai.chat.prompt.PromptTemplate;
+import org.springframework.ai.converter.BeanOutputConverter;
+import org.springframework.ai.converter.StructuredOutputConverter;
 import org.springframework.ai.document.Document;
 import org.springframework.ai.embedding.Embedding;
 import org.springframework.ai.embedding.EmbeddingModel;
@@ -21,14 +25,13 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import reactor.core.publisher.Flux;
 
-import java.time.Duration;
 import java.util.List;
 import java.util.Map;
-import java.util.concurrent.Semaphore;
 
 import static groovy.json.JsonOutput.toJson;
 
 
+@Slf4j
 @Service
 public class AiServiceImpl implements AiService {
 
@@ -43,6 +46,8 @@ public class AiServiceImpl implements AiService {
 
     @Autowired
     private VectorStore vectorStore;
+
+    private final Logger logger = LoggerFactory.getLogger(AiServiceImpl.class);
 
 /*    @Resource
     private AiWebsocketService aiWebsocketService;*/
@@ -66,6 +71,17 @@ public class AiServiceImpl implements AiService {
             "3. **美食推荐**：介绍该地点的特色美食，不仅列举菜肴，还要描述美食的口感和诱人的外观，尝试让读者感受到美食的香气与色彩。推荐美食时，尽量让描述充满感官体验，使读者有强烈的食欲。\n" +
             "4. **玩乐推荐**：推荐该地点的娱乐活动和独特体验，包括户外活动、夜生活、文化体验等，确保让答案具有吸引力，能够激发游客前往的兴趣。通过推荐的活动和体验，增强旅行的情感色彩，让游客产生亲自参与的冲动。\n" +
             "回答时尽量使内容有层次感、感性丰富，同时要令读者产生亲身体验的欲望,符合逻辑。具体例子和生动细节的加入，能够让旅行规划更加吸引人，仿佛是读者的旅行即将启程。";
+
+
+    private final String GET_POINT_PROMPT =
+            """
+                    提取文字中的旅行线路 {context} 强严格按照以下格式返回结果：
+                    1. 每一天的路线必须列出，并且必须严格按照路线排列景点：
+                    2. 请确保格式严格符合要求，所有地点使用'地点名称'的形式。
+                    3. 返回的必须符合JSON结构：
+                    请根据这些要求提取并返回对应的路线，确保每一天的顺序和格式严格正确。注意只返回json不要多加任何语句
+                    {format}
+                    """;
 
     @Override
     public String generate(String message) {
@@ -124,6 +140,17 @@ public class AiServiceImpl implements AiService {
         return generateByPromote(message,PROMPT_BLUEPRINT+"\n\n"+PROMPT_PLAN);
     }
 
+    @Override
+    public Itinerary getPoint(String message) {
+        StructuredOutputConverter<Itinerary> itineraryStructuredOutputConverter= new BeanOutputConverter<>(Itinerary.class);
+        PromptTemplate promptTemplate=new PromptTemplate(GET_POINT_PROMPT);
+        Prompt p=promptTemplate.create(Map.of("context",message,"format",itineraryStructuredOutputConverter.getFormat()));
+        ChatResponse response= chatModel.call(p);
+        return itineraryStructuredOutputConverter.convert(response.getResult().getOutput().getContent());
+    }
+
+
+
 /*
     public Void answer(String message){
 
@@ -142,13 +169,8 @@ public class AiServiceImpl implements AiService {
         EmbeddingResponse  embeddingResponse=embeddingModel.call(
                 new EmbeddingRequest(List.of(text),
                         OpenAiEmbeddingOptions.builder().withModel("text-embedding-ada-002").build()));
-
-
         return embeddingResponse.getResults();
     }
-
-
-
 
 
 }

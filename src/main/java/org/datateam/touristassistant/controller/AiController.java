@@ -32,6 +32,11 @@ public class AiController {
         return aiService.generatePlan(message);
     }
 
+    @GetMapping("/point")
+    public String chatPoint(String message){
+        return aiService.getPoint(message).toString();
+    }
+
 
     @MessageMapping("/chat")
     public void sendMessage(@Param(value = "Authorization") String token, @Param(value = "message") String message){

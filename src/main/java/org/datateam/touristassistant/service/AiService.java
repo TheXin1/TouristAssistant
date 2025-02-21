@@ -1,5 +1,6 @@
 package org.datateam.touristassistant.service;
 
+import org.datateam.touristassistant.pojo.Itinerary;
 import reactor.core.publisher.Flux;
 
 public interface AiService {
@@ -12,6 +13,8 @@ public interface AiService {
 
     //生成旅行计划
     Flux<String> generatePlan(String message);
+
+    Itinerary getPoint(String message);
 
 
 }

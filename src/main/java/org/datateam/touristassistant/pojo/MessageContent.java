@@ -2,8 +2,10 @@ package org.datateam.touristassistant.pojo;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 
+import java.util.List;
+
 public class MessageContent {
-    private String id;
+    private long id;
     private String content;
     private boolean hasSlice;
     private String type;
@@ -11,11 +13,11 @@ public class MessageContent {
     private Polyline polyline;
 
     // Getters and setters
-    public String getId() {
+    public long getId() {
         return id;
     }
 
-    public void setId(String id) {
+    public void setId(long id) {
         this.id = id;
     }
 
@@ -63,12 +65,12 @@ public class MessageContent {
     public static class Polyline {
         @JsonProperty("isPolyline")
         private boolean isPolyline;
-        private String[] polyline;
+        private List<List<Double>> polyline;
 
         public Polyline() {
         }
 
-        public Polyline(boolean isPolyline, String[] polyline) {
+        public Polyline(boolean isPolyline, List<List<Double>> polyline) {
             this.isPolyline = isPolyline;
             this.polyline = polyline;
         }
@@ -81,11 +83,11 @@ public class MessageContent {
             isPolyline = polyline;
         }
 
-        public String[] getPolyline() {
+        public List<List<Double>> getPolyline() {
             return polyline;
         }
 
-        public void setPolyline(String[] polyline) {
+        public void setPolyline(List<List<Double>> polyline) {
             this.polyline = polyline;
         }
     }
