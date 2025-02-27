@@ -1,6 +1,8 @@
 package org.datateam.touristassistant.service;
 
 import org.datateam.touristassistant.pojo.Itinerary;
+import org.springframework.core.io.Resource;
+import org.springframework.web.multipart.MultipartFile;
 import reactor.core.publisher.Flux;
 
 public interface AiService {
@@ -15,6 +17,12 @@ public interface AiService {
     Flux<String> generatePlan(String message);
 
     Itinerary getPoint(String message);
+
+    //语音转录api
+    String transcript(Resource file);
+
+    //语音合成api
+    String synthesis(String message);
 
 
 }

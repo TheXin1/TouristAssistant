@@ -6,6 +6,8 @@ import org.datateam.touristassistant.pojo.Itinerary;
 import org.datateam.touristassistant.service.AiService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.ai.audio.transcription.AudioTranscriptionPrompt;
+import org.springframework.ai.audio.transcription.AudioTranscriptionResponse;
 import org.springframework.ai.chat.client.ChatClient;
 import org.springframework.ai.chat.model.ChatModel;
 import org.springframework.ai.chat.model.ChatResponse;
@@ -18,11 +20,16 @@ import org.springframework.ai.embedding.Embedding;
 import org.springframework.ai.embedding.EmbeddingModel;
 import org.springframework.ai.embedding.EmbeddingRequest;
 import org.springframework.ai.embedding.EmbeddingResponse;
+import org.springframework.ai.openai.OpenAiAudioTranscriptionModel;
+import org.springframework.ai.openai.OpenAiAudioTranscriptionOptions;
 import org.springframework.ai.openai.OpenAiChatOptions;
 import org.springframework.ai.openai.OpenAiEmbeddingOptions;
+import org.springframework.ai.openai.api.OpenAiAudioApi;
 import org.springframework.ai.vectorstore.VectorStore;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.core.io.Resource;
 import org.springframework.stereotype.Service;
+import org.springframework.web.multipart.MultipartFile;
 import reactor.core.publisher.Flux;
 
 import java.util.List;
@@ -46,6 +53,9 @@ public class AiServiceImpl implements AiService {
 
     @Autowired
     private VectorStore vectorStore;
+
+    @Autowired
+    private OpenAiAudioTranscriptionModel openAiAudioTranscriptionModel;
 
     private final Logger logger = LoggerFactory.getLogger(AiServiceImpl.class);
 
@@ -147,6 +157,25 @@ public class AiServiceImpl implements AiService {
         Prompt p=promptTemplate.create(Map.of("context",message,"format",itineraryStructuredOutputConverter.getFormat()));
         ChatResponse response= chatModel.call(p);
         return itineraryStructuredOutputConverter.convert(response.getResult().getOutput().getContent());
+    }
+
+    @Override
+    public String transcript(Resource file) {
+        logger.info(file.toString());
+        OpenAiAudioTranscriptionOptions transcriptionOptions=OpenAiAudioTranscriptionOptions.builder()
+                .withLanguage("ch")
+                .withResponseFormat(
+                OpenAiAudioApi.TranscriptResponseFormat.TEXT
+        ).withTemperature(0f).build();
+
+        AudioTranscriptionPrompt audioTranscriptionPrompt = new AudioTranscriptionPrompt(file, transcriptionOptions);
+        AudioTranscriptionResponse res = openAiAudioTranscriptionModel.call(audioTranscriptionPrompt);
+        return res.getResult().toString();
+    }
+
+    @Override
+    public String synthesis(String message) {
+        return "";
     }
 
 
