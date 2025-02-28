@@ -27,11 +27,13 @@ import org.springframework.ai.openai.OpenAiEmbeddingOptions;
 import org.springframework.ai.openai.api.OpenAiAudioApi;
 import org.springframework.ai.vectorstore.VectorStore;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.core.io.Resource;
+import org.springframework.core.io.ByteArrayResource;
+import org.springframework.core.io.ClassPathResource;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 import reactor.core.publisher.Flux;
 
+import java.io.IOException;
 import java.util.List;
 import java.util.Map;
 
@@ -160,18 +162,41 @@ public class AiServiceImpl implements AiService {
     }
 
     @Override
-    public String transcript(Resource file) {
-        logger.info(file.toString());
+    public String transcript(MultipartFile file) throws IOException {
+        // 将音频文件转换为字节数组
+        byte[] audioBytes = file.getBytes();
+
+        ByteArrayResource audioResource = new ByteArrayResource(audioBytes) {
+            @Override
+            public String getFilename() {
+                return file.getOriginalFilename();
+            }
+        };
         OpenAiAudioTranscriptionOptions transcriptionOptions=OpenAiAudioTranscriptionOptions.builder()
-                .withLanguage("ch")
+                .withModel("whisper-1")
                 .withResponseFormat(
                 OpenAiAudioApi.TranscriptResponseFormat.TEXT
         ).withTemperature(0f).build();
 
-        AudioTranscriptionPrompt audioTranscriptionPrompt = new AudioTranscriptionPrompt(file, transcriptionOptions);
+        AudioTranscriptionPrompt audioTranscriptionPrompt = new AudioTranscriptionPrompt(audioResource, transcriptionOptions);
         AudioTranscriptionResponse res = openAiAudioTranscriptionModel.call(audioTranscriptionPrompt);
-        return res.getResult().toString();
+        return res.getResult().getOutput();
     }
+
+/*    public String Test() throws IOException {
+        // 将音频文件转换为字节数组
+        ClassPathResource resource = new ClassPathResource("测试音频.mp3");
+        OpenAiAudioTranscriptionOptions transcriptionOptions=OpenAiAudioTranscriptionOptions.builder()
+                .withResponseFormat(
+                        OpenAiAudioApi.TranscriptResponseFormat.TEXT
+                ).withTemperature(0f).build();
+
+        AudioTranscriptionPrompt audioTranscriptionPrompt = new AudioTranscriptionPrompt(resource, transcriptionOptions);
+        AudioTranscriptionResponse res = openAiAudioTranscriptionModel.call(audioTranscriptionPrompt);
+        return res.getResult().getOutput();
+    }*/
+
+
 
     @Override
     public String synthesis(String message) {

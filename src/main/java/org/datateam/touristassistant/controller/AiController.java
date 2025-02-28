@@ -16,6 +16,8 @@ import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.reactive.function.client.WebClient;
 import reactor.core.publisher.Flux;
 
+import java.io.IOException;
+
 @RestController
 @RequestMapping("/api/ai")
 public class AiController {
@@ -54,10 +56,11 @@ public class AiController {
 
     }
 
+    //不支持m4p
     @PostMapping("/transcript")
     public ResponseEntity<?> transcript(@RequestBody MultipartFile file) {
         try {
-            String transcript = aiService.transcript(file.getResource());
+            String transcript = aiService.transcript(file);
             return ResponseEntity.ok(new Results(200, true, "转录成功", transcript));
         } catch (Exception e) {
             logger.error("转录失败: ", e);
@@ -66,5 +69,14 @@ public class AiController {
         }
     }
 
+
+  /*  @GetMapping("/test")
+    public String test(){
+        try {
+            return aiService.Test();
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+    }*/
 
 }

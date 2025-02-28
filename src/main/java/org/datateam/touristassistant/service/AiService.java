@@ -5,6 +5,8 @@ import org.springframework.core.io.Resource;
 import org.springframework.web.multipart.MultipartFile;
 import reactor.core.publisher.Flux;
 
+import java.io.IOException;
+
 public interface AiService {
     String generate(String message);
 
@@ -19,7 +21,7 @@ public interface AiService {
     Itinerary getPoint(String message);
 
     //语音转录api
-    String transcript(Resource file);
+    String transcript(MultipartFile file) throws IOException;
 
     //语音合成api
     String synthesis(String message);

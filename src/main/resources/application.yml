@@ -14,8 +14,9 @@ spring:
   ai:
     openai:
 #      api-key: sk-Nmh1bJqY341KnM3akiAbha1Y9CNKsPu9lNS9C94L37nZSwpb
-      api-key: sk-gyK3XszGOjzQscMELHmGzdGLTjIZ0OeeGLdUPTfstFDfSZTS
+      api-key: sk-dHDUtAqByl7UNfNjyuIB2FPV4taLHMN3jEKdd3LWlVQ0Khdi
       base-url: https://chatapi.littlewheat.com
+#      base-url: https://api.xty.app
       chat:
         options:
           model: "gpt-4"
