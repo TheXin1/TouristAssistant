@@ -15,4 +15,11 @@ public class Itinerary {
     public void setItinerary(List<DayRoute> itinerary) {
         this.itinerary = itinerary;
     }
+
+    @Override
+    public String toString() {
+        return "Itinerary{" +
+                "itinerary=" + itinerary +
+                '}';
+    }
 }

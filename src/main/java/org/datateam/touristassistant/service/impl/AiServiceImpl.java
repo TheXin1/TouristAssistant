@@ -20,10 +20,7 @@ import org.springframework.ai.embedding.Embedding;
 import org.springframework.ai.embedding.EmbeddingModel;
 import org.springframework.ai.embedding.EmbeddingRequest;
 import org.springframework.ai.embedding.EmbeddingResponse;
-import org.springframework.ai.openai.OpenAiAudioTranscriptionModel;
-import org.springframework.ai.openai.OpenAiAudioTranscriptionOptions;
-import org.springframework.ai.openai.OpenAiChatOptions;
-import org.springframework.ai.openai.OpenAiEmbeddingOptions;
+import org.springframework.ai.openai.*;
 import org.springframework.ai.openai.api.OpenAiAudioApi;
 import org.springframework.ai.vectorstore.VectorStore;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -59,6 +56,9 @@ public class AiServiceImpl implements AiService {
     @Autowired
     private OpenAiAudioTranscriptionModel openAiAudioTranscriptionModel;
 
+    @Autowired
+    private OpenAiAudioSpeechModel openAiAudioSpeechModel;
+
     private final Logger logger = LoggerFactory.getLogger(AiServiceImpl.class);
 
 /*    @Resource
@@ -88,9 +88,10 @@ public class AiServiceImpl implements AiService {
     private final String GET_POINT_PROMPT =
             """
                     提取文字中的旅行线路 {context} 强严格按照以下格式返回结果：
-                    1. 每一天的路线必须列出，并且必须严格按照路线排列景点：
-                    2. 请确保格式严格符合要求，所有地点使用'地点名称'的形式。
-                    3. 返回的必须符合JSON结构：
+                    1.每一天的路线必须列出，并且必须严格按照路线排列景点：
+                    2.attractionName为整个景区名称不可空缺且只填景点名称;
+                    3. 请确保格式严格符合要求，所有地点使用'地点名称'的形式。
+                    4. 返回的必须符合JSON结构：
                     请根据这些要求提取并返回对应的路线，确保每一天的顺序和格式严格正确。注意只返回json不要多加任何语句
                     {format}
                     """;
@@ -200,6 +201,7 @@ public class AiServiceImpl implements AiService {
 
     @Override
     public String synthesis(String message) {
+
         return "";
     }
 

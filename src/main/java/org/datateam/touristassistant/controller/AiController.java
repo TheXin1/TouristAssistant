@@ -1,6 +1,7 @@
 package org.datateam.touristassistant.controller;
 
 import org.apache.ibatis.annotations.Param;
+import org.datateam.touristassistant.pojo.Itinerary;
 import org.datateam.touristassistant.pojo.Results;
 import org.datateam.touristassistant.service.impl.AiServiceImpl;
 import org.slf4j.Logger;
@@ -46,8 +47,9 @@ public class AiController {
     }
 
     @GetMapping("/point")
-    public String chatPoint(String message){
-        return aiService.getPoint(message).toString();
+    public Object chatPoint(String message){
+        Itinerary point = aiService.getPoint(message);
+        return point;
     }
 
 
@@ -56,7 +58,7 @@ public class AiController {
 
     }
 
-    //不支持m4p
+    //不支持m4a
     @PostMapping("/transcript")
     public ResponseEntity<?> transcript(@RequestBody MultipartFile file) {
         try {

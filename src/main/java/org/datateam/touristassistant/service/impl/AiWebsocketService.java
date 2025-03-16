@@ -141,13 +141,16 @@ public class AiWebsocketService {
                 semaphore.acquire();
                 insertMessageAsync(new Message(openid,sb.toString(),"assistant",nowTime));
 
+                logger.info(sb.toString());
                 Itinerary point=aiService.getPoint(sb.toString());
 
                 logger.info(point.toString());
 
+
                 //目前只拿第一天
                 List<String> route = point.getItinerary().get(0).getRoute();
 
+                String attractionName = point.getItinerary().get(0).getAttractionName();
 
 
                 List<List<Double>> xy =new ArrayList<>();
@@ -156,7 +159,8 @@ public class AiWebsocketService {
                 for (String s:route){
                     ArrayList<Double> temp=new ArrayList<>();
 
-                    Location locationByAddress = tencentMapService.getLocationByAddress(s);
+                    logger.info(attractionName+s);
+                    Location locationByAddress = tencentMapService.getLocationByAddress(attractionName+s);
 
                     temp.add(locationByAddress.getLatitude());
                     temp.add(locationByAddress.getLongitude());

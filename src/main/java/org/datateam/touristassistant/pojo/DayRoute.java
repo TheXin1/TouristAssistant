@@ -4,7 +4,16 @@ import java.util.List;
 
 public class DayRoute {
     private int day;
+    private String attractionName;
     private List<String> route;
+
+    public String getAttractionName() {
+        return attractionName;
+    }
+
+    public void setAttractionName(String attractionName) {
+        this.attractionName = attractionName;
+    }
 
     public int getDay() {
         return day;
