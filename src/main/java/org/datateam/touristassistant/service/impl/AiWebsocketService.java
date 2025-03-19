@@ -25,6 +25,7 @@ import org.springframework.boot.autoconfigure.condition.ConditionalOnClass;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Component;
 import org.springframework.web.socket.server.standard.SpringConfigurator;
+import reactor.core.Disposable;
 import reactor.core.publisher.Flux;
 
 import java.io.IOException;
@@ -48,8 +49,13 @@ public class AiWebsocketService {
 
     private final ObjectMapper objectMapper = new ObjectMapper();
 
+/*
 //     存放所有的 WebSocket 连接
-//    private static Map<String, AiWebsocketService> aiWebSocketServicesMap = new ConcurrentHashMap<>();
+    private static Map<String, AiWebsocketService> aiWebSocketServicesMap = new ConcurrentHashMap<>();
+*/
+
+    //存储所有订阅信息
+    private  static final Map<String, Disposable> activeSubscriptions = new ConcurrentHashMap<>();
 
     private static AutowireCapableBeanFactory beanFactory;
     @Autowired
@@ -106,7 +112,12 @@ public class AiWebsocketService {
             //时间
             LocalDateTime nowTime = LocalDateTime.now();
             //拿到content
+            logger.info(msgContent.getContent());
             String content = msgContent.getContent();
+            if ("stop".equalsIgnoreCase(content)){
+                stopProcessing(openid);
+                return ;
+            }
 
             insertMessageAsync(new Message(openid,content,msgContent.getType()
                     ,nowTime));
@@ -123,76 +134,86 @@ public class AiWebsocketService {
             responseContent.setTime(nowTime.toString());
             responseContent.setPolyline(new MessageContent.Polyline(false,null));
 
+
             if (isTouristPlanningRelated(content)) {
                 flux = aiService.generatePlan(content);
                 //具体规划逻辑
-                Semaphore semaphore =new Semaphore(0);
+                CompletableFuture<Void> processingFuture = new CompletableFuture<>();
                 //id
-                flux.delayElements(Duration.ofMillis(50)).subscribe(chunk->{
-                    sb.append(chunk);
-                    responseContent.setContent(chunk);
-                    sendMessage(responseContent);
-                    }, error -> {
-                            semaphore.release();
-                        }, // 失败释放信号量
-                        semaphore::release// 成功释放信号量
+                Disposable subscribe = flux.delayElements(Duration.ofMillis(50)).subscribe(chunk -> {
+                            sb.append(chunk);
+                            responseContent.setContent(chunk);
+                            sendMessage(responseContent);
+                        }, error -> processingFuture.completeExceptionally(error)
                 );
 
-                semaphore.acquire();
-                insertMessageAsync(new Message(openid,sb.toString(),"assistant",nowTime));
+                activeSubscriptions.put(openid, subscribe);
 
-                logger.info(sb.toString());
-                Itinerary point=aiService.getPoint(sb.toString());
+                // 异步等待 Flux 完成
+                processingFuture.whenComplete((result, error) -> {
+                    if (error == null) {
+                        insertMessageAsync(new Message(openid,sb.toString(),"assistant",nowTime));
+                        logger.info(sb.toString());
+                        Itinerary point=aiService.getPoint(sb.toString());
 
-                logger.info(point.toString());
-
-
-                //目前只拿第一天
-                List<String> route = point.getItinerary().get(0).getRoute();
-
-                String attractionName = point.getItinerary().get(0).getAttractionName();
+                        logger.info(point.toString());
 
 
-                List<List<Double>> xy =new ArrayList<>();
+                        //目前只拿第一天
+                        List<String> route = point.getItinerary().get(0).getRoute();
+
+                        String attractionName = point.getItinerary().get(0).getAttractionName();
 
 
-                for (String s:route){
-                    ArrayList<Double> temp=new ArrayList<>();
-
-                    logger.info(attractionName+s);
-                    Location locationByAddress = tencentMapService.getLocationByAddress(attractionName+s);
-
-                    temp.add(locationByAddress.getLatitude());
-                    temp.add(locationByAddress.getLongitude());
-                    xy.add(temp);
-                }
-                responseContent.setPolyline(new MessageContent.Polyline(true,xy));
-                sendMessage(responseContent);
+                        List<List<Double>> xy =new ArrayList<>();
 
 
+                        for (String s:route){
+                            ArrayList<Double> temp=new ArrayList<>();
 
+                            logger.info(attractionName+s);
+                            Location locationByAddress = tencentMapService.getLocationByAddress(attractionName+s);
+
+                            temp.add(locationByAddress.getLatitude());
+                            temp.add(locationByAddress.getLongitude());
+                            xy.add(temp);
+                        }
+                        responseContent.setPolyline(new MessageContent.Polyline(true,xy));
+                        sendMessage(responseContent);
+                    } else {
+                        logger.error("Flux 处理失败", error);
+                    }
+                    // 任务完成，移除订阅
+                    activeSubscriptions.remove(openid);
+                });
             } else {
                 //对话逻辑
                 flux = aiService.generateRAG(content);
                 //发送得到回应
-                // 设置同步信号量
-                Semaphore semaphore = new Semaphore(0);
-                flux.delayElements(Duration.ofMillis(50)).subscribe(chunk -> {
-                    sb.append(chunk);
-                    responseContent.setContent(chunk);
-                    sendMessage(responseContent);
-                }, error -> {
-                            semaphore.release();
-                        }, // 失败释放信号量
-                        semaphore::release// 成功释放信号量
-                       );
+                //异步插入信号量
+                CompletableFuture<Void> processingFuture = new CompletableFuture<>();
+                Disposable subscribe = flux.delayElements(Duration.ofMillis(50)).subscribe(chunk -> {
+                            sb.append(chunk);
+                            responseContent.setContent(chunk);
+                            sendMessage(responseContent);
+                        },
+                        processingFuture::completeExceptionally
+                );
 
-                semaphore.acquire();
-                logger.info(sb.toString());
-                //持久层代码
+                // 存储订阅信息
+                activeSubscriptions.put(openid, subscribe);
 
-                insertMessageAsync(new Message(openid,sb.toString(),"assistant",nowTime));
-
+                // 异步等待 Flux 完成
+                processingFuture.whenComplete((result, error) -> {
+                    if (error == null) {
+                        logger.info(sb.toString());
+                        insertMessageAsync(new Message(openid, sb.toString(), "assistant", nowTime));
+                    } else {
+                        logger.error("Flux 处理失败", error);
+                    }
+                    // 任务完成，移除订阅
+                    activeSubscriptions.remove(openid);
+                });
             }
 
 
@@ -200,6 +221,15 @@ public class AiWebsocketService {
             logger.error("处理消息时发生错误", e);
         }
 
+    }
+
+    private void stopProcessing(String openid) {
+        Disposable subscription = activeSubscriptions.remove(openid);
+        if (subscription != null && !subscription.isDisposed()) {
+            subscription.dispose();
+            logger.info("终止了 openid={} 的 Flux 处理", openid);
+
+        }
     }
 
     //异步插入
