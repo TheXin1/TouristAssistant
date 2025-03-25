@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="org.datateam.touristassistant.mapper.PointMapper">
+
+    <!-- 通过 ID 查询地点详情 -->
+    <select id="getPointById" parameterType="int" resultType="org.datateam.touristassistant.pojo.Point">
+        SELECT * FROM point WHERE id = #{id}
+    </select>
+
+    <!-- 查询一定范围内的地点 ID -->
+    <select id="getNearbyPointIds" resultType="int">
+        SELECT id FROM point
+        WHERE (latitude BETWEEN #{minLat} AND #{maxLat})
+          AND (longitude BETWEEN #{minLon} AND #{maxLon})
+    </select>
+
+    <!-- 获取所有地点 -->
+    <select id="getAllPoints" resultType="org.datateam.touristassistant.pojo.Point">
+        SELECT * FROM point
+    </select>
+
+</mapper>
