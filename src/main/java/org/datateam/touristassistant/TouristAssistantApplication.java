@@ -11,7 +11,8 @@ import org.springframework.context.ApplicationContext;
 import org.springframework.context.annotation.Bean;
 
 @SpringBootApplication
-@MapperScan("org.datateam.touristassistant.mapper")
+@
+        MapperScan("org.datateam.touristassistant.mapper")
 /*@ServletComponentScan  //测试阶段关闭拦截器*/
 public class TouristAssistantApplication {
 
