@@ -213,10 +213,10 @@ public class AiWebsocketService {
                 processingFuture.whenComplete((result, error) -> {
                     if (error == null) {
                         logger.info(sb.toString());
-                        insertMessageAsync(new Message(openid, sb.toString(), "assistant", nowTime));
                         responseContent.setContent("");
                         responseContent.setHasSlice(false);
                         sendMessage(responseContent);
+                        insertMessageAsync(new Message(openid, sb.toString(), "assistant", nowTime));
                     } else {
                         logger.error("Flux 处理失败", error);
                     }

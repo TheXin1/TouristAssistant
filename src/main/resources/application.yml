@@ -6,7 +6,11 @@ spring:
     password: Touristassistantsystemno1!
   application:
     name: TouristAssistant
-
+  web:
+    resources:
+      static-locations:
+        - classpath:/static/
+        - file:/root/Touristassistantsystem/avatars/
   servlet:
     multipart:
       max-file-size: 100MB
