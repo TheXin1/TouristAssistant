@@ -41,9 +41,9 @@ tencent:
   map:
     key: IEHBZ-XVLK4-3XTUF-FW2XR-3P7ES-SPBDO
 
-server:
-  port: 443
-  ssl:
-    key-store: classpath:keystore.p12
-    key-store-password: 123456
-    key-store-type: PKCS12
+#server:
+#  port: 443
+#  ssl:
+#    key-store: classpath:keystore.p12
+#    key-store-password: 123456
+#    key-store-type: PKCS12

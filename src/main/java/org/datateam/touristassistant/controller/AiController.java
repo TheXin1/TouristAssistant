@@ -61,7 +61,7 @@ public class AiController {
 
     //不支持m4a
     @PostMapping("/transcript")
-    public ResponseEntity<?> transcript(@RequestBody MultipartFile file) {
+    public ResponseEntity<?> transcript(@RequestParam MultipartFile file) {
         try {
             String transcript = aiService.transcript(file);
             return ResponseEntity.ok(new Results(200, true, "转录成功", transcript));
