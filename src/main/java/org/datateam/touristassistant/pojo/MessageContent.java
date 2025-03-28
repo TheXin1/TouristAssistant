@@ -1,9 +1,11 @@
 package org.datateam.touristassistant.pojo;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
 import java.util.List;
 
+@JsonIgnoreProperties(ignoreUnknown = true) // 忽略 JSON 中未知字段
 public class MessageContent {
     private long id;
     private String content;
@@ -11,6 +13,7 @@ public class MessageContent {
     private String type;
     private String time;
     private Polyline polyline;
+    private List<List<Double>> position;
 
     // Getters and setters
     public long getId() {
@@ -59,6 +62,15 @@ public class MessageContent {
 
     public void setPolyline(Polyline polyline) {
         this.polyline = polyline;
+    }
+
+
+    public List<List<Double>> getPosition() {
+        return position;
+    }
+
+    public void setPosition(List<List<Double>> position) {
+        this.position = position;
     }
 
     // Polyline 内部类

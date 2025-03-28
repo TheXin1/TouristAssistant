@@ -74,19 +74,19 @@ public class AiWebsocketService {
     public void onOpen(Session session, @PathParam("token") String token) {
         this.session = session;
 
-       /* //验证token
+        //验证token
         if(token==null || token.isEmpty() || JwtUtil.isTokenExpiration(token)){
             try {
                 session.close();
             } catch (IOException e) {
                 logger.error("连接失败", e);
             }
-        }*/
+        }
         this.aiService = beanFactory.getBean(AiServiceImpl.class);
         this.messageMapper=beanFactory.getBean(MessageMapper.class);
         this.tencentMapService=beanFactory.getBean(TencentMapServiceImpl.class);
-        /*session.getUserProperties().put("openid", JwtUtil.parseToken(token).get("openid"));*/
-        session.getUserProperties().put("openid",token);
+        session.getUserProperties().put("openid", JwtUtil.parseToken(token).get("openid"));
+        logger.info(JwtUtil.parseToken(token).get("openid").toString());
         logger.info("有新的 WebSocket 连接进入");
     }
 
