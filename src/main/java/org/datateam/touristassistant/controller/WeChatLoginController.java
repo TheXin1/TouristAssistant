@@ -88,7 +88,7 @@ public class WeChatLoginController {
 
     // 注册接口
     @PostMapping("/register")
-    public ResponseEntity<?> register(@RequestBody MultipartFile avatar,@RequestBody String nickname,@RequestBody String code) {
+    public ResponseEntity<?> register(@RequestParam MultipartFile avatar,@RequestParam String nickname,@RequestParam String code) {
         // 调用微信 API 获取 openid
         String url = WECHAT_LOGIN_URL + "?appid=" + appid + "&secret=" + secret + "&js_code=" + code + "&grant_type=authorization_code";
         String response = restTemplate.getForObject(url, String.class);
