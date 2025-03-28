@@ -3,8 +3,11 @@ package org.datateam.touristassistant.controller;
 import org.datateam.touristassistant.pojo.Results;
 import org.datateam.touristassistant.pojo.User;
 import org.datateam.touristassistant.service.UserService;
+import org.datateam.touristassistant.service.impl.AiWebsocketService;
 import org.datateam.touristassistant.utils.JwtUtil;
 import org.json.JSONObject;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.web.bind.annotation.*;
@@ -38,9 +41,13 @@ public class WeChatLoginController {
     @Autowired
     private UserService userService;
 
+    private final Logger logger = LoggerFactory.getLogger(WeChatLoginController.class);
+
     // 登录接口
     @PostMapping("/login")
-    public ResponseEntity<?> login(@RequestParam("code") String code) {
+    public ResponseEntity<?> login(@RequestBody Map<String,Object> jsonObject) {
+
+        String code = (String)jsonObject.get("code");
         // 调用微信 API 获取 openid
         String url = WECHAT_LOGIN_URL + "?appid=" + appid + "&secret=" + secret + "&js_code=" + code + "&grant_type=authorization_code";
         String response = restTemplate.getForObject(url, String.class);
@@ -57,7 +64,7 @@ public class WeChatLoginController {
         User user = userService.findByOpenid(openid);
         if (user == null) {
             // 如果是第一次登录
-            return ResponseEntity.ok(new Results(200, true, "登录成功", Map.of("isFirst", true)));
+            return ResponseEntity.ok(new Results(200, true, "第一次登录", Map.of("isFirst", true)));
         } else {
             // 如果已经注册，返回用户信息
             // 生成 JWT token
@@ -81,7 +88,7 @@ public class WeChatLoginController {
 
     // 注册接口
     @PostMapping("/register")
-    public ResponseEntity<?> register(@RequestParam(value = "avatar") MultipartFile avatar,@RequestParam(value = "nickname") String nickname,@RequestParam("code") String code) {
+    public ResponseEntity<?> register(@RequestBody MultipartFile avatar,@RequestBody String nickname,@RequestBody String code) {
         // 调用微信 API 获取 openid
         String url = WECHAT_LOGIN_URL + "?appid=" + appid + "&secret=" + secret + "&js_code=" + code + "&grant_type=authorization_code";
         String response = restTemplate.getForObject(url, String.class);
