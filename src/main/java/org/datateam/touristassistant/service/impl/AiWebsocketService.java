@@ -113,9 +113,16 @@ public class AiWebsocketService {
             LocalDateTime nowTime = LocalDateTime.now();
             //拿到content
             logger.info(msgContent.getContent());
+
+            MessageContent responseContent = new MessageContent();
+            //id
+            long id=SnowFlakeUtil.getID();
             String content = msgContent.getContent();
             if ("stop".equalsIgnoreCase(content)){
                 stopProcessing(openid);
+                responseContent.setId(id);
+                responseContent.setContent("成功停止");
+                sendMessage(responseContent);
                 return ;
             }
 
@@ -124,9 +131,7 @@ public class AiWebsocketService {
 
             Flux<String> flux;
 
-            MessageContent responseContent = new MessageContent();
-            //id
-            long id=SnowFlakeUtil.getID();
+
             //基础字段
             responseContent.setId(id);
             responseContent.setHasSlice(true);
@@ -178,6 +183,7 @@ public class AiWebsocketService {
                             temp.add(locationByAddress.getLongitude());
                             xy.add(temp);
                         }
+                        responseContent.setHasSlice(false);
                         responseContent.setPolyline(new MessageContent.Polyline(true,xy));
                         sendMessage(responseContent);
                     } else {
@@ -208,6 +214,9 @@ public class AiWebsocketService {
                     if (error == null) {
                         logger.info(sb.toString());
                         insertMessageAsync(new Message(openid, sb.toString(), "assistant", nowTime));
+                        responseContent.setContent("");
+                        responseContent.setHasSlice(false);
+                        sendMessage(responseContent);
                     } else {
                         logger.error("Flux 处理失败", error);
                     }
