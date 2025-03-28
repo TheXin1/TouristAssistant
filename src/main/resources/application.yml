@@ -8,9 +8,7 @@ spring:
     name: TouristAssistant
   web:
     resources:
-      static-locations:
-        - classpath:/static/
-        - file:/root/Touristassistantsystem/avatars/
+      static-locations: file:/root/Touristassistantsystem/avatars/
   servlet:
     multipart:
       max-file-size: 100MB
