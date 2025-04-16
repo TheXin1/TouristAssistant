@@ -8,7 +8,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 @RestController
-@RequestMapping("/api/location") // ✅ 添加类级别路径
+@RequestMapping("/api/location") //  添加类级别路径
 public class LocationController {
 
     private final TencentMapService tencentMapService;

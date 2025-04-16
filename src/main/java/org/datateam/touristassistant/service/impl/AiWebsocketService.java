@@ -149,7 +149,12 @@ public class AiWebsocketService {
                             sb.append(chunk);
                             responseContent.setContent(chunk);
                             sendMessage(responseContent);
-                        }, error -> processingFuture.completeExceptionally(error)
+                        }, error -> {
+                            processingFuture.completeExceptionally(error);  // 异常时完成
+                        },
+                        () -> {
+                            processingFuture.complete(null);  // 正常完成时触发
+                        }
                 );
 
                 activeSubscriptions.put(openid, subscribe);
@@ -203,7 +208,12 @@ public class AiWebsocketService {
                             responseContent.setContent(chunk);
                             sendMessage(responseContent);
                         },
-                        processingFuture::completeExceptionally
+                        error -> {
+                            processingFuture.completeExceptionally(error);  // 异常时完成
+                        },
+                        () -> {
+                            processingFuture.complete(null);  // 正常完成时触发
+                        }
                 );
 
                 // 存储订阅信息

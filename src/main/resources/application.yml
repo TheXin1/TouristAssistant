@@ -15,14 +15,24 @@ spring:
       max-request-size: 100MB
   ai:
     openai:
-#      api-key: sk-Nmh1bJqY341KnM3akiAbha1Y9CNKsPu9lNS9C94L37nZSwpb
-      api-key: sk-YqmJzeoBJhaNS9PI41165d59C62b41A7B8Cf07E41dCc01Cd
-#      base-url: https://chatapi.littlewheat.com
-      base-url: https://api.xty.app
+      #deepseek : sk-701fb2894a7c4f6fa36f776918af0c7b
+      base-url: https://api.deepseek.com
+      api-key: sk-701fb2894a7c4f6fa36f776918af0c7b
       chat:
         options:
-          model: "gpt-4"
-#              model: "gpt-3.5-turbo"
+          model: deepseek-reasoner
+          temperature: 1.3
+      embedding:
+        api-key: sk-YqmJzeoBJhaNS9PI41165d59C62b41A7B8Cf07E41dCc01Cd
+        base-url: https://api.xty.app
+        options:
+          model: text-embedding-ada-002
+      audio:
+        speech:
+          base-url: https://api.xty.app
+          api-key: sk-YqmJzeoBJhaNS9PI41165d59C62b41A7B8Cf07E41dCc01Cd
+
+
     vectorstore:
       redis:
         uri: redis://localhost:6379
@@ -43,10 +53,14 @@ tencent:
   map:
     key: IEHBZ-XVLK4-3XTUF-FW2XR-3P7ES-SPBDO
 
-server:
-  port: 443
-  ssl:
-    key-store: classpath:keystore.p12
-    key-store-password: 123456
-    key-store-type: PKCS12
+#server:
+#  port: 443
+#  ssl:
+#    key-store: classpath:keystore.p12
+#    key-store-password: 123456
+#    key-store-type: PKCS12
 
+
+
+#      api-key: sk-Nmh1bJqY341KnM3akiAbha1Y9CNKsPu9lNS9C94L37nZSwpb
+#      base-url: https://chatapi.littlewheat.com

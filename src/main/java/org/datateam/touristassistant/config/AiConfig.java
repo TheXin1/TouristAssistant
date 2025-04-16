@@ -12,11 +12,12 @@ public class AiConfig {
 
     @Bean
     ChatClient chatClient(ChatClient.Builder builder){
-        return builder.defaultSystem("你是一个旅游小助手").build();
+        return builder.defaultSystem("你是一个旅游小助手,你叫小D").build();
     }
 
     @Bean
     public DocumentTransformer documentTransformer(){
         return  new TokenTextSplitter();
     }
+
 }

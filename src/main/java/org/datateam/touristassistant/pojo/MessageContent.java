@@ -64,15 +64,6 @@ public class MessageContent {
         this.polyline = polyline;
     }
 
-
-    public List<List<Double>> getPosition() {
-        return position;
-    }
-
-    public void setPosition(List<List<Double>> position) {
-        this.position = position;
-    }
-
     // Polyline 内部类
     public static class Polyline {
         @JsonProperty("isPolyline")

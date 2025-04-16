@@ -71,6 +71,20 @@ public class AiController {
                     .body(new Results(500, false, "转录失败", null));
         }
     }
+    //文字转语音
+    @GetMapping("synthesis")
+    public ResponseEntity<Resource> synthesis(String text) {
+        try {
+            String resource = aiService.synthesis(text);
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
+        } catch (Exception e) {
+            logger.error("语音合成失败: ", e);
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
+        }
+    }
+
+
+
 
 
   /*  @GetMapping("/test")

@@ -22,14 +22,17 @@ import org.springframework.ai.embedding.EmbeddingRequest;
 import org.springframework.ai.embedding.EmbeddingResponse;
 import org.springframework.ai.openai.*;
 import org.springframework.ai.openai.api.OpenAiAudioApi;
+import org.springframework.ai.openai.audio.speech.SpeechResponse;
 import org.springframework.ai.vectorstore.VectorStore;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.io.ByteArrayResource;
 import org.springframework.core.io.ClassPathResource;
+import org.springframework.core.io.Resource;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 import reactor.core.publisher.Flux;
 
+import java.io.File;
 import java.io.IOException;
 import java.util.List;
 import java.util.Map;
@@ -97,15 +100,7 @@ public class AiServiceImpl implements AiService {
 
     @Override
     public String generate(String message) {
-        ChatResponse response= chatModel.call(
-                new Prompt(message, OpenAiChatOptions.builder()
-                        .withModel("gpt-3.5-turbo")
-                        .withTemperature(0.7)
-                        .build()
-                )
-        );
-
-        return response.getResult().getOutput().getContent();
+        return chatClient.prompt(message).call().content();
     }
 
     /**
@@ -137,7 +132,7 @@ public class AiServiceImpl implements AiService {
 
         Prompt p = promptTemplate.create(Map.of("context", context, "query", message));
 
-
+        logger.info(p.toString());
 
         /*ChatResponse response= chatModel.call(p);
 
@@ -200,6 +195,7 @@ public class AiServiceImpl implements AiService {
 
     @Override
     public String synthesis(String message) {
+        byte[] call = openAiAudioSpeechModel.call(message);
 
         return "";
     }
