@@ -8,7 +8,9 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.io.Resource;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.messaging.handler.annotation.MessageMapping;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
@@ -72,11 +74,11 @@ public class AiController {
         }
     }
     //文字转语音
-    @GetMapping("synthesis")
+    @PostMapping("synthesis")
     public ResponseEntity<Resource> synthesis(String text) {
         try {
-            String resource = aiService.synthesis(text);
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
+            Resource audio = aiService.synthesis(text);
+            return ResponseEntity.ok().header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=output.mp3").contentType(MediaType.parseMediaType("audio/mpeg")).body(audio);
         } catch (Exception e) {
             logger.error("语音合成失败: ", e);
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();

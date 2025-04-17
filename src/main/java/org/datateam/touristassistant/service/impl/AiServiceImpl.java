@@ -22,6 +22,7 @@ import org.springframework.ai.embedding.EmbeddingRequest;
 import org.springframework.ai.embedding.EmbeddingResponse;
 import org.springframework.ai.openai.*;
 import org.springframework.ai.openai.api.OpenAiAudioApi;
+import org.springframework.ai.openai.audio.speech.SpeechPrompt;
 import org.springframework.ai.openai.audio.speech.SpeechResponse;
 import org.springframework.ai.vectorstore.VectorStore;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -61,6 +62,8 @@ public class AiServiceImpl implements AiService {
 
     @Autowired
     private OpenAiAudioSpeechModel openAiAudioSpeechModel;
+
+
 
     private final Logger logger = LoggerFactory.getLogger(AiServiceImpl.class);
 
@@ -194,10 +197,17 @@ public class AiServiceImpl implements AiService {
 
 
     @Override
-    public String synthesis(String message) {
-        byte[] call = openAiAudioSpeechModel.call(message);
+    public Resource synthesis(String message) {
+        SpeechResponse call = openAiAudioSpeechModel.call(new SpeechPrompt(message));
+        byte[] output = call.getResult().getOutput();
 
-        return "";
+
+        return new ByteArrayResource(output){
+            @Override
+            public String getFilename() {
+                return "audio.mp3";
+            }
+        };
     }
 
 

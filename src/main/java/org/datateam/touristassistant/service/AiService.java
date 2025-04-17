@@ -24,7 +24,7 @@ public interface AiService {
     String transcript(MultipartFile file) throws IOException;
 
     //语音合成api
-    String synthesis(String message);
+    Resource synthesis(String message);
 
 
 }
